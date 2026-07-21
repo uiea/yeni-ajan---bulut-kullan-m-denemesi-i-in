@@ -9,6 +9,8 @@
 | Workspace agent architect | Eklendi | `.agent.md` |
 | Tam çalışma hafızası | Hazır | `hafiza/` |
 | Notion Yapay Zeka Çalışma Takvimi | Oluşturuldu | Notion çalışma alanı |
+| Satış Operasyon ajanı | Hazır | `ajanlar/satis-operasyon/` ve Neon konsolu |
+| İş Stratejisi ajanı | Hazır | `ajanlar/is-stratejisi/` ve Neon konsolu |
 
 ## Müşteriler ve projeler
 
