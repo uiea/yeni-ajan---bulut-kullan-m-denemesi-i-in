@@ -5,7 +5,6 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $gitDir = Join-Path $RepositoryPath '.git'
-$lockPath = Join-Path $gitDir 'auto-sync.lock'
 $logPath = Join-Path $gitDir 'auto-sync.log'
 
 function Write-SyncLog([string]$Message) {
@@ -18,12 +17,6 @@ function Invoke-Git {
     if ($LASTEXITCODE -ne 0) {
         throw "git $($Arguments -join ' ') başarısız oldu (çıkış kodu: $LASTEXITCODE)."
     }
-}
-
-try {
-    $lock = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-} catch {
-    exit 0
 }
 
 try {
@@ -55,6 +48,4 @@ try {
     Write-SyncLog "HATA: $($_.Exception.Message)"
     exit 1
 } finally {
-    if ($lock) { $lock.Dispose() }
-    Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
 }
