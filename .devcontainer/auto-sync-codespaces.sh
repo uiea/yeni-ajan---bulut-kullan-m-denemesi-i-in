@@ -12,7 +12,9 @@ log() {
 sync_repository() {
   cd "$repo_root" || return 1
 
-  git add --all
+  # Protect against accidental deletions in a Codespace. New and modified
+  # files are synchronized automatically; removals require an explicit Git action.
+  git add --ignore-removal --all
   if ! git diff --cached --quiet; then
     if ! git config user.name >/dev/null || ! git config user.email >/dev/null; then
       log 'Git author identity is missing; changes were not committed.'
