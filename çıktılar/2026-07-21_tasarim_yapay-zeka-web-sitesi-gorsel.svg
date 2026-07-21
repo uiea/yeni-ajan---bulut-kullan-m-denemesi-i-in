@@ -1,0 +1,38 @@
+<svg width="1080" height="1350" viewBox="0 0 1080 1350" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#13100d" />
+      <stop offset="100%" stop-color="#181411" />
+    </linearGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1080" height="1350" fill="url(#bg)" />
+  <rect x="60" y="60" width="960" height="1230" rx="40" ry="40" fill="none" stroke="rgba(218,177,83,0.45)" stroke-width="4" />
+  <circle cx="220" cy="280" r="250" fill="rgba(218,177,83,0.12)" />
+  <circle cx="860" cy="420" r="190" fill="rgba(218,177,83,0.08)" />
+  <circle cx="760" cy="1020" r="300" fill="rgba(218,177,83,0.10)" />
+  <g opacity="0.18">
+    <path d="M80 220 L1000 220" stroke="#dac053" stroke-width="2" />
+    <path d="M80 292 L1000 292" stroke="#dac053" stroke-width="2" />
+    <path d="M80 364 L1000 364" stroke="#dac053" stroke-width="2" />
+    <path d="M80 436 L1000 436" stroke="#dac053" stroke-width="2" />
+  </g>
+  <text x="100" y="180" fill="#dac053" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="0.2em">YAPAY ZEKA DESTEKLİ WEB SİTESİ</text>
+  <text x="100" y="280" fill="#f8f0e0" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="0.01em">Küçük işletmeler için</text>
+  <text x="100" y="360" fill="#f8f0e0" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="0.01em">hızlı ve net dijital</text>
+  <text x="100" y="440" fill="#f8f0e0" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="0.01em">vitrin</text>
+  <rect x="100" y="520" width="880" height="2" fill="#dac053" />
+  <text x="100" y="600" fill="#d4c9b5" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="600">• Hazır sayfa yapısı ile teknik engelleri azaltın</text>
+  <text x="100" y="660" fill="#d4c9b5" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="600">• Ürün ve hizmetlerinizi hızla gösterime alın</text>
+  <text x="100" y="720" fill="#d4c9b5" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="600">• Zaman, bütçe ve enerji tasarrufu sağlayın</text>
+  <rect x="100" y="820" width="860" height="220" rx="24" ry="24" fill="rgba(218,177,83,0.08)" />
+  <text x="120" y="880" fill="#f8f0e0" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="700">AI destekli web siteden bugün başlayın.</text>
+  <text x="120" y="948" fill="#d4c9b5" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="600">Küçük işletme sahipleri için paylaşılmaya hazır görsel.</text>
+  <text x="100" y="1280" fill="#b9a981" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="500">#ai #websitesi #küçükişletme #dijitalvitrin</text>
+</svg>
