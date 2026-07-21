@@ -41,6 +41,7 @@ Bir istek geldiğinde:
 | Milyoner Dönüşüm Partneri | `ajanlar/milyoner-mentalite-donusum-ajani/` | Amaç, niş, AI ile gelir ve kişisel gelişim için 30 günlük keşif rotası oluşturmaya yardımcı olur; profil güncellemeleri için önce onay alır. |
 | Web Sitesi Yönetimi | `ajanlar/web-sitesi-yonetimi/` | Her müşteri için ayrı bir skill ve her proje için merkezi yerel klasör oluşturarak web sitesi çalışmalarını düzenler. |
 | Karar Yakalama | `ajanlar/karar-yakalama/` | Tüm ajanların önemli ve onaylanmış kararlarını merkezi kayda alır; ilgili müşteri ve proje belgelerine yönlendirir. |
+| Local Bilgisayar | `ajanlar/local-bilgisayar/` | Yerel çalışma alanı ve GitHub eşitleme durumunu denetler, sorunları raporlar. |
 
 > Bu tablo bilerek tek satırla başlıyor. Üye, Ajan Kurucu ile yeni ajanlar kurdukça her biri için
 > buraya bir satır ekle. Çalışma alanı bu tabloyla düzenli kalır.
