@@ -33,8 +33,9 @@ want into a working agent made of plain Markdown files.
 | Scaffold the agent | `skills/scaffold-agent.md` | Create the files from the template and register it |
 | Write a skill | `skills/write-skill.md` | Give the new agent its first real capability |
 | Verify the agent | `skills/verify-agent.md` | Check it against the checklist before it goes live |
+| Automate GitHub sync | `skills/auto-sync-repo.md` | Keep the repository pulled and synced automatically |
 
-These skills run roughly in order: onboard -> design -> scaffold -> write a skill -> verify.
+These skills run roughly in order: onboard -> design -> scaffold -> write a skill -> verify -> automate sync.
 
 ## Inputs
 
