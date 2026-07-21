@@ -24,6 +24,11 @@ Her kayıt kısa tutulur. Amaç sohbet dökümünü kopyalamak değil, sonraki o
 - Sonuç: Yerel taslak hazırlandı; yayınlama veya zamanlama yapılmadı.
 - Açık nokta / sonraki adım: Görsel üretimi ya da paylaşım öncesi düzenleme istenirse yeni bir onayla ilerlenir.
 - İlgili dosyalar: `çıktılar/2026-07-21_sosyal-medya-icerik_kucuk-isletmeler-icin-ai-otomasyonlari-carousel.md`.
+- İstek: Instagram carousel görsellerini üretip tamamlamak.
+- Yapılan iş: Kapak dahil sekiz görsel üretildi, slayt bazında paketlendi ve 1080x1350 piksel tutarlı 4:5 Instagram sürümleri oluşturuldu.
+- Sonuç: Yerel, yayınlanmamış carousel görsel paketi hazır.
+- Açık nokta / sonraki adım: Metin katmanları taslak dosyasına göre Canva, Figma veya benzeri bir düzenleyicide eklenebilir; yayın için ayrıca onay gerekir.
+- İlgili dosyalar: `çıktılar/2026-07-21_instagram-carousel-ai-otomasyonlari/`.
 
 ## Kayıt şablonu
 
