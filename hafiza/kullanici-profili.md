@@ -14,6 +14,7 @@ Bu dosya, yalnızca kullanıcının açıkça belirttiği kalıcı çalışma te
 - Yerel proje dosyaları için VS Code kullanmaya devam etmek istiyor.
 - Android telefondan bilgisayarına uzaktan bağlanarak VS Code kullanmayı planlıyor.
 - Notion çalışma alanı bağlı; planlama ve takvim kaydı için kullanılabilir.
+- Yeni ajanlar eklenirken önce mevcut yapı ve proje bağlamı okunmalı, sonra düzenleme yapılmalıdır.
 
 ## Gizlilik sınırı
 

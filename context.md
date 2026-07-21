@@ -17,47 +17,24 @@ update it any time; it is meant to grow with you.
 ---
 
 ## Who I am
-<!-- Your name, what you do, your background. One short paragraph is enough. -->
-<!-- Example: "I am Ayşe. I run a small online store selling handmade jewelry. No coding background." -->
-
-
+I am Ali Akça. I work on building practical AI agent workflows, local web project setups, and reusable documentation for a small but growing AI-assisted workspace.
 
 ## What I want (my goal)
-<!-- The outcome you actually want. Be concrete. A number and a date make it sharper. -->
-<!-- Example: "Reach 1000 followers and 20 sales a month within 3 months, without spending all day on it." -->
-
-
+I want to turn this workspace into a reliable system for delivering web, design, and content work more efficiently. A clear near-term goal is to produce at least one polished local project proof and use it as a foundation for future client work.
 
 ## My route
-<!-- From the income-route lesson, there are four routes. Which one are you leaning toward? -->
-<!-- - Proje Ajansı: solve a concrete business problem as a project (produces strong proof fast)
-     - Ürün: build your own product or SaaS (scalable, usually not the fastest first income)
-     - Eğitim: teach what you know (winning skill is communication; scaling is the hard part)
-     - Dönüşüm: guide a company through its AI transition (proof speaks; needs analysis / FDE)
-     Pick one to start. You can change it later. -->
-<!-- Not sure yet? Write "henüz emin değilim" and leave the rest. Ajan Kurucu will walk you
-     through the four routes and the route lesson's decision questions, and help you lean toward one. -->
-
-
+I am leaning toward the project agency route. I want to solve concrete business problems with small, focused projects and build proof quickly rather than starting with a large product.
 
 ## What I am good at / what I have
-<!-- Skills, time, audience, tools, anything you can build on. -->
-
-
+I am good at organizing workflows, creating repeatable processes, working in VS Code, structuring project folders, and turning rough ideas into clear documentation or implementation plans. I also have a growing set of agent-based tools for web, design, and content tasks.
 
 ## What gets in my way
-<!-- Your real constraints: time, money, fear, lack of a technical background, etc.
-     Naming these helps the agents give advice that actually fits you. -->
-
-
+My main constraints are time, focus, and the risk of overcomplicating things. I need simple systems that stay useful instead of becoming too heavy.
 
 ## How I like to work
-<!-- Tone and style you want from your agents. -->
-<!-- Example: "Warm and direct. No corporate jargon. Short over long. Turkish." -->
-
-
+I like practical, direct, and structured work. I prefer short explanations, clear next steps, and solutions that can be applied immediately.
 
 ## Anything else an agent should know about me
-<!-- Anything that does not fit above but matters. -->
+I prefer local-first workflows and clear ownership. I want agents to be careful, concrete, and explicit, especially around approvals, file changes, and external publishing.
 
 

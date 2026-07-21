@@ -6,6 +6,7 @@
 |------|-------|--------------|
 | Web Sitesi Yönetimi ajanı | Hazır | `ajanlar/web-sitesi-yonetimi/` |
 | Karar Yakalama ajanı | Hazır | `ajanlar/karar-yakalama/` |
+| Workspace agent architect | Eklendi | `.agent.md` |
 | Tam çalışma hafızası | Hazır | `hafiza/` |
 | Notion Yapay Zeka Çalışma Takvimi | Oluşturuldu | Notion çalışma alanı |
 
