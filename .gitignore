@@ -1,0 +1,7 @@
+# Secrets - never commit
+.env.local
+.env
+
+# macOS
+.DS_Store
+node_modules

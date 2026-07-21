@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0d1720"/><stop offset="1" stop-color="#172633"/></linearGradient>
+    <style>.name{font:700 54px Arial,sans-serif;letter-spacing:3px;fill:#f5f0e7}.role{font:24px Arial,sans-serif;fill:#c99b51}.contact{font:22px Arial,sans-serif;fill:#b8c1c6}.small{font:14px Arial,sans-serif;letter-spacing:1.5px;fill:#94a0a7}.gold{stroke:#c99b51;fill:none;stroke-linecap:round;stroke-linejoin:round}</style>
+  </defs>
+  <rect width="1200" height="680" fill="url(#bg)"/><rect width="16" height="680" fill="#c99b51"/><circle cx="1100" cy="-90" r="340" fill="none" stroke="#c99b51" stroke-opacity=".27"/>
+  <g transform="translate(106 115)" class="gold">
+    <path d="M50 95V25M50 48 20 24M50 58 80 28M50 72 28 57M50 82 73 59" stroke-width="6"/>
+    <path d="M8 27C8 5 34-5 50 12 66-5 92 5 92 27c0 15-13 25-26 25H34C21 52 8 42 8 27Z" stroke-width="6"/>
+    <path d="M0 125h100L87 149H14Z" stroke-width="6"/><path d="M17 125c15 10 51 10 66 0M50 95v30M50 95l29 25H50Z" stroke-width="4"/><path d="M8 160c14-7 28 7 42 0s28 7 42 0" stroke-width="4"/>
+  </g>
+  <text x="245" y="154" class="name">Ali AKÇA</text><text x="248" y="194" class="role">Mekatronik Teknikeri / Girişimci</text>
+  <g class="gold" stroke-width="3" transform="translate(110 430)"><path d="M5 2h8l4 10-6 4c4 8 9 13 17 17l4-6 10 4v8c0 4-4 6-8 6C17 45 0 28 0 10c0-4 2-8 5-8Z"/></g><text x="168" y="461" class="contact">Tel: +90 5XX XXX XX XX</text>
+  <g class="gold" stroke-width="3" transform="translate(110 493)"><rect x="1" y="3" width="43" height="31" rx="3"/><path d="m2 7 21 15L43 7"/></g><text x="168" y="525" class="contact">E-posta: ornek@eposta.com</text>
+  <text x="720" y="563" class="small">İLETİŞİM İÇİN QR KODU TARATIN</text>
+  <rect x="950" y="405" width="180" height="180" rx="6" fill="white"/>
+  <g fill="#172633" transform="translate(964 419)"><path d="M0 0h42v42H0zm7 7v28h28V7zM14 14h14v14H14zM110 0h42v42h-42zm7 7v28h28V7zm7 7h14v14h-14zM0 110h42v42H0zm7 7v28h28v-28zm7 7h14v14H14zM49 0h7v14h-7zm14 0h14v7H63zm21 0h14v14H84zM49 21h14v14H49zm21 0h7v21h-7zm14 7h14v7H84zm-35 21h7v14h-7zm14 0h21v7H63zm28 7h7v14h-7zm14-7h14v14h-14zM49 70h14v14H49zm21 0h7v28h-7zm14 0h21v7H84zm28 0h7v21h-7zm-63 21h7v14h-7zm14 0h14v7H63zm21 0h7v21h-7zm14 0h21v7H84zm-49 21h14v14H49zm21 7h7v14h-7zm14 0h14v7H84zm21 0h14v14h-14z"/></g>
+  <text x="979" y="615" fill="#172633" style="font:bold 12px Arial;letter-spacing:1px">GOOGLE.COM</text>
+</svg>

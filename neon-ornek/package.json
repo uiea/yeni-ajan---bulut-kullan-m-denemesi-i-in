@@ -1,0 +1,25 @@
+{
+  "name": "neon-ornek",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "db:init": "tsx src/init-db.ts",
+    "db:demo": "tsx src/demo.ts",
+    "db:content-plan": "tsx src/seed-content-plan.ts",
+    "db:replace-day-two": "tsx src/replace-day-two.ts",
+    "db:list-content-plan": "tsx src/list-content-plan.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "postgres": "^3.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}
