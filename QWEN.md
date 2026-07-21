@@ -44,6 +44,29 @@ Bir istek geldiğinde:
 > Bu tablo bilerek tek satırla başlıyor. Üye, Ajan Kurucu ile yeni ajanlar kurdukça her biri için
 > buraya bir satır ekle. Çalışma alanı bu tabloyla düzenli kalır.
 
+## Hazır uzmanlık becerileri
+
+`.agents/` dizini, yeni ya da mevcut ajanlara eklenebilecek hazır uzmanlık becerileri kütüphanesidir.
+İstek aşağıdaki alanlardan birine giriyorsa, önce ilgili Markdown dosyasını oku; ardından görevi
+mevcut ajan kuralları ve kullanıcı bağlamıyla birlikte uygula.
+
+| Alan | Yol | Kapsam |
+|------|-----|--------|
+| YouTube | `.agents/youtube/` | Araştırma, senaryo, SEO, küçük resim ve yorum analizi |
+| İçerik dönüşümü | `.agents/social-media/` | Kısa video, Reels, TikTok, LinkedIn, carousel ve X içerikleri |
+| Görsel anlatım | `.agents/visuals/` | Veri açıklayıcıları, karşılaştırmalar, grafikler, hareketli içerik ve sunumlar |
+| Satış | `.agents/hey-sales/` | CRM, takip, lead değerlendirme ve satış stratejisi |
+| Strateji | `.agents/hey-strategist/` | Finansal analiz, büyüme hipotezleri, satış ve maliyet analizi |
+| Instagram | `.agents/instagram/` | Reels, carousel, caption, tekil görsel ve performans araştırması |
+| Meta reklamları | `.agents/meta-ads/` | Kreatif, hedef kitle, bütçe, kampanya ve performans analizi |
+| Asistanlık | `.agents/secretary/` | Günlük brifing, e-posta özeti, öncelik ve haftalık değerlendirme |
+| X / Twitter | `.agents/twitter/` | Tweet, thread, yanıt araştırması ve performans analizi |
+
+Bu dosyalar yeni ajan oluşturmaz; ilgili ajanın `skills/` klasörüne uyarlanabilecek kaynaklardır.
+Herhangi bir paylaşım, yükleme, API çağrısı, CRM/e-posta kaydı veya reklam hesabı değişikliği içeren
+skill uygulanmadan önce mevcut açık kullanıcı onayı kuralı geçerlidir. Başlangıç şablonu
+`.agents/_SKILL_TEMPLATE.md` dosyasıdır.
+
 ## Ajan Kurucu kuralı
 
 Ne zaman yeni bir ajan kurmak, mevcut bir ajana yetenek/skill eklemek ya da ajanları düzenlemek istersem; önce `ajanlar/ajan-kurucu/AGENT.md` dosyasını oku ve onun yönergelerini izle. Ajan Kurucu benim ajan kurma rehberim.
