@@ -19,6 +19,11 @@ Her kayıt kısa tutulur. Amaç sohbet dökümünü kopyalamak değil, sonraki o
 - Sonuç: Üretim derlemesi ve yerel HTTP konsol doğrulaması başarılı. Dış CRM, arama, mesajlaşma ve finansal işlem sınırları taslak/onay modunda korunuyor.
 - Açık nokta / sonraki adım: Gerçek bir sohbet yanıtını denemek için yapılandırılmış OpenAI erişimiyle, yalnızca kullanıcı onayı sonrası API çağrısı yapılabilir.
 - İlgili dosyalar: `ajanlar/satis-operasyon/`, `ajanlar/is-stratejisi/`, `neon-dashboard/src/lib/agents.ts`.
+- İstek: Instagram becerisiyle küçük işletmeler için yapay zekâ otomasyonları carousel taslağı hazırlamak.
+- Yapılan iş: 8 slaytlık carousel planı, görsel brief'i, caption, CTA ve hashtag seti oluşturuldu.
+- Sonuç: Yerel taslak hazırlandı; yayınlama veya zamanlama yapılmadı.
+- Açık nokta / sonraki adım: Görsel üretimi ya da paylaşım öncesi düzenleme istenirse yeni bir onayla ilerlenir.
+- İlgili dosyalar: `çıktılar/2026-07-21_sosyal-medya-icerik_kucuk-isletmeler-icin-ai-otomasyonlari-carousel.md`.
 
 ## Kayıt şablonu
 
