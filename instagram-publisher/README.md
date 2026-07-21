@@ -1,6 +1,6 @@
 # Instagram Web yayınlayıcı
 
-Bu araç, ilk çalıştırmada Instagram Web girişini kullanıcıya yaptırır ve tarayıcı oturumunu `profile/` içinde yerel olarak saklar. Şifre veya erişim bilgisi dosyaya yazılmaz.
+Bu araç, ilk çalıştırmada Instagram Web girişini kullanıcıya yaptırır ve tarayıcı oturumunu `profile/` içinde yerel olarak saklar. Şifreyi kaynak koda veya yapılandırma dosyasına yazmaz; tarayıcı oturum çerezleri `profile/` klasöründe tutulur ve bu klasör Git'e eklenmez.
 
 Kurulum:
 

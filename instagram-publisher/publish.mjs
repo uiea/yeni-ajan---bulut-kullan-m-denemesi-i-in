@@ -16,6 +16,7 @@ if (!image || !fs.existsSync(image)) {
 
 const browser = await chromium.launchPersistentContext(path.resolve("profile"), {
   headless: false,
+  channel: "chromium",
   viewport: { width: 1280, height: 900 },
 });
 const page = browser.pages()[0] ?? await browser.newPage();
@@ -46,7 +47,8 @@ await captionBox.first().fill(caption);
 if (!shouldPublish) {
   console.log("Gönderi hazırlandı. Tarayıcıdaki Paylaş düğmesine basılmadı.");
   console.log("Paylaşmak için aynı komutu --publish parametresiyle, açık onaydan sonra çalıştır.");
-  await page.waitForTimeout(0);
+  // Tarayıcı ve taslak ekranda açık kalsın; kullanıcı pencereyi kapattığında süreç biter.
+  await new Promise((resolve) => browser.on("close", resolve));
 } else {
   const share = page.getByRole("button", { name: /share|paylaş/i });
   await share.waitFor({ state: "visible", timeout: 30000 });
