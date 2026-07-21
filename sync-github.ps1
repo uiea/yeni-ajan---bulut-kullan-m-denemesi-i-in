@@ -20,6 +20,9 @@ function Invoke-Git {
 }
 
 try {
+    # Normalize repository path: if script called from VS Code with ${workspaceFolder},
+    # it may come quoted or relative; resolve to full path.
+    $RepositoryPath = Resolve-Path -LiteralPath $RepositoryPath | Select-Object -ExpandProperty Path
     Set-Location -LiteralPath $RepositoryPath
     Write-SyncLog 'Eşitleme başladı.'
 

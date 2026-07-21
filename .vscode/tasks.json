@@ -15,5 +15,26 @@
       },
       "problemMatcher": []
     }
+    ,
+    {
+      "label": "Auto sync Git (PowerShell)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/sync-github.ps1"
+      ],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    }
   ]
 }
