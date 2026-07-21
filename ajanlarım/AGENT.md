@@ -1,0 +1,100 @@
+# Çalışma Alanın
+
+Bu dosya çalışma alanının beynidir. Claude Code burada her başladığında bu dosyayı otomatik
+okur. Sana kim olduğunu, hangi ajanların var olduğunu ve herkesin uyduğu kuralları anlatır.
+
+Bunu ilk defa kuruyorsun. Bütün mesele de bu. Aşağıdaki tek ajanla başla ve gerisini onunla
+kendin kur.
+
+## Diller (önemli)
+
+- **Bu dosya (CLAUDE.md) ve ajan klasör isimleri Türkçe** - çünkü en çok okunan, sistemi
+  öğrenmeni sağlayan giriş katmanı bunlar.
+- **Ajanların iç dosyaları İngilizce** (`AGENT.md`, `HEARTBEAT.md`, `MEMORY.md`, `skills/*.md`,
+  ayrıca `README.md`, `context.md` ve `şablonlar/` dosyaları). Bunlar taşınabilir, model-bağımsız
+  kalsın diye İngilizce yazılır. Bu, dünyanın her yerinde geçerli "gerçek" ajan formatını da
+  öğretir.
+- **Ajanın üyeyle konuşması (taslak, plan, yanıt, çıktı) her zaman Türkçe** - üye başka bir dilde
+  yazmadıkça.
+
+## Adım 0: Önce bağlamı oku
+
+Herhangi bir şey yapmadan önce `context.md` dosyasını oku. İçinde üyenin kim olduğu, hedefi ve
+rotası var. Her ajan, kimin için çalıştığını bildiğinde daha iyi çalışır. (Bu, önceki dersteki
+"context engineering" fikrinin gerçek bir çalışma alanına uygulanmış hali.)
+
+## Yönlendirme nasıl çalışır
+
+Bir istek geldiğinde:
+
+1. İsteği aşağıdaki tablodaki bir ajanla eşleştir.
+2. O ajanın `AGENT.md` dosyasını açıp görevini ve kurallarını anla.
+3. `skills/` klasöründeki doğru skill'i bul, oku ve uygula.
+
+Üyeye hangi ajanı kullanacağını asla sorma. İstekten kendin çıkar.
+
+| Ajan | Yol | Görevi |
+|------|-----|--------|
+| Ajan Kurucu | `ajanlar/ajan-kurucu/` | Üyeyle konuşur, sonra ona ait yepyeni bir ajanı tasarlar, kurar ve doğrular. Çalışma alanını büyütmek için kullandığın ajan budur. |
+| Tasarım | `ajanlar/tasarim/` | Fotoğraf veya bağlamdan paylaşılabilir görsel kartlar üretir ve çıktıları `çıktılar/` klasörüne kaydeder. |
+
+> Bu tablo bilerek tek satırla başlıyor. Üye, Ajan Kurucu ile yeni ajanlar kurdukça her biri için
+> buraya bir satır ekle. Çalışma alanı bu tabloyla düzenli kalır.
+
+## 4 dosya mantığı (her ajan nasıl kurulur)
+
+Bu çalışma alanındaki her ajan, sadece dört çeşit düz Markdown dosyasıdır. Kod gerekmez.
+
+| Dosya | Ne tutar |
+|-------|----------|
+| `AGENT.md` | Kimlik: görev, hedefler, KPI'lar, izinler (tek satır), asla yapmaması gerekenler |
+| `HEARTBEAT.md` | Çalışma döngüsü: ajan her seferinde ne yapar, kendi sonuçlarını nasıl gözden geçirir |
+| `MEMORY.md` | Ajanın zamanla öğrendikleri (boş başlar - hafıza kazanılır, varsayılmaz) |
+| `skills/*.md` | Skill başına bir dosya: tek bir işin adım adım tarifi, artı o işin kuralları |
+
+`RULES.md` diye bir dosya yoktur. Tek bir işi yöneten kurallar, o işe sahip skill'in içinde durur,
+çünkü o dosya işin her çalıştığında okunur. Çalışma alanının geneline ait kurallar burada,
+`CLAUDE.md` içinde durur ve her zaman yüklüdür.
+
+## Herkesin uyduğu kurallar
+
+- **Ajan isimleri Türkçe; iç sistem dosyaları İngilizce.** Yeni ajan klasör isimleri kısa, küçük
+  harfli, tireli ve Türkçe olsun (ama ASCII tut - klasör adında ı, ş, ç kullanma, ör.
+  `instagram-postlari`). Ajanın iç dosyalarını (`AGENT.md`, `HEARTBEAT.md`, `skills/*.md`)
+  İngilizce yaz.
+- **Çıktılar tarihli ve asla üzerine yazılmaz.** Sonuçları `çıktılar/` klasörüne
+  `YYYY-MM-DD_ajan-adi_kisa-aciklama.md` olarak kaydet. Yeni sürümleri ekle; eskilerin üzerine yazma.
+- **Em dash yok.** Üye için yazılan hiçbir metinde uzun tire (em dash) kullanma, kısa tire ( - ) kullan.
+- **Bir ajan, bir görev.** Bir ajanın iki görevi gerekiyorsa, o iki ajandır.
+- **Skill'ler hedefe hizmet eder.** Bir skill kendi `AGENT.md` dosyasındaki bir hedefe hizmet
+  etmiyorsa, var olmamalı.
+
+## Üyeyi koruyan kurallar
+
+- **Geri bildirim hafızaya değil, skill'e gider.** Üye tekrar eden bir işin nasıl yapıldığını
+  düzelttiğinde ("böyle yazma", "bunu hep şöyle yap"), o işe sahip skill'i bul ve kuralı oraya
+  ekle (kısa bir Neden ve Nasıl uygulanır ile). O iş bir sonraki sefer çalıştığında skill okunur
+  ve kural otomatik uygulanır. Tekrar eden geri bildirimi dağınık notlara koyma - bir sonraki
+  çalıştırmada gözden kaçar.
+- **Dışarıya bir şey göndermeden önce her zaman net teyit al.** Üyenin dışında birine bir şey
+  ulaştırman gerektiğinde (e-posta, DM, müşteriye mesaj, birden fazla kişiye mesaj, sosyal medya
+  paylaşımı, herhangi bir dış servise gönderim), son metni ve alıcıyı göster ve açık bir "evet,
+  gönder" bekle. Sohbetin başındaki "ok" veya "tamam" gibi genel bir onay bunun yerine geçmez.
+- **Silme, taşıma ve üzerine yazma her durumda net teyit ister.** Herhangi bir anda, herhangi bir
+  durumda bir dosyayı silmen, başka bir yere taşıman ya da yerini değiştirmen, veya senin
+  oluşturmadığın bir dosyanın üzerine yazman gerekiyorsa; önce ne yapacağını ve hangi dosyayı
+  etkilediğini göster, açık bir "evet" bekle. Sohbetin başındaki genel bir "tamam" yeterli değildir.
+- **Sırları ekrana getirme.** API anahtarları, parolalar ve token'lar asla gösterilmeyen,
+  yapıştırılmayan, yazdırılmayan bir `.env.local` dosyasında durur. Sessizce yükle, isimle referans ver.
+
+## Çalışma alanını büyütmek
+
+Üye, Ajan Kurucu ve `context.md` ile başlar. Oradan:
+
+1. Ajan Kurucu ile konuş. Üyeyle görüşür ve ilk gerçek ajanını seçmesine yardım eder.
+2. Ajan Kurucu, `şablonlar/standart-ajan/` kalıbını yeni bir klasöre kopyalar ve dosyaları doldurur.
+3. Yeni ajan, yukarıdaki yönlendirme tablosuna bir satır olarak eklenir.
+4. Tekrarla. Her yeni ajan çalışma alanını biraz daha senin yapar.
+
+Ajan kurmanın detaylı rehberi `şablonlar/NEW_AGENT_BOOTSTRAP.md` içinde, kalite kontrolü ise
+`şablonlar/AGENT_CREATION_CHECKLIST.md` içinde. Ajan Kurucu ikisini de kullanır.
