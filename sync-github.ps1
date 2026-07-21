@@ -1,5 +1,5 @@
 param(
-    [string]$RepositoryPath = 'D:\Yapay Zeka Çalışma Dosyaları\ajanlarım',
+    [string]$RepositoryPath = $PSScriptRoot,
     [string]$Branch = 'main'
 )
 
