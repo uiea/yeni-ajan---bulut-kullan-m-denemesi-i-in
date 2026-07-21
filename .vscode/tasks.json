@@ -2,10 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Codespaces Git auto-sync",
+      "label": "Auto pull Git (PowerShell)",
       "type": "shell",
-      "command": "bash",
-      "args": [".devcontainer/start-auto-sync.sh"],
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/pull-github.ps1"
+      ],
       "runOptions": {
         "runOn": "folderOpen"
       },
@@ -17,7 +23,7 @@
     }
     ,
     {
-      "label": "Auto sync Git (PowerShell)",
+      "label": "Auto sync loop (PowerShell)",
       "type": "shell",
       "command": "powershell",
       "args": [
@@ -25,11 +31,12 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "${workspaceFolder}/sync-github.ps1"
+        "${workspaceFolder}/auto-sync-loop.ps1"
       ],
       "runOptions": {
         "runOn": "folderOpen"
       },
+      "isBackground": true,
       "presentation": {
         "reveal": "never",
         "panel": "dedicated"
