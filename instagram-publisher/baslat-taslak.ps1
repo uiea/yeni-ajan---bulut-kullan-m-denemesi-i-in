@@ -1,9 +1,13 @@
 param(
-  [string]$Image = "..\çıktılar\2026-07-21_instagram-carousel-ai-otomasyonlari\instagram-4x5\01_kapak.png",
-  [string]$Caption = "Yapay zekâ ile iş akışlarını otomatikleştirmenin 6 pratik yolu.`n`nMüşteri mesajlarından içerik planına, toplantı notlarından satış önceliklerine kadar tekrar eden işleri daha hızlı ve düzenli yönetmek mümkün.`n`nKaydetmeyi unutma.`n`n#yapayzeka #otomasyon #verimlilik #isakisleri #ai #dijitalpazarlama"
+  [string]$Caption = "Yapay zeka ile is akislarini otomatiklestirmenin 6 pratik yolu. Musteri mesajlarindan icerik planina, toplanti notlarindan satis onceliklerine kadar tekrar eden isleri daha hizli ve duzenli yonetmek mumkun. Kaydetmeyi unutma. #yapayzeka #otomasyon #verimlilik #isakisleri #ai #dijitalpazarlama"
 )
 
 $ErrorActionPreference = "Stop"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $here
-& node.exe publish.mjs --image $Image --caption $Caption
+$root = Split-Path -Parent $here
+$outputFolder = Get-ChildItem -LiteralPath $root -Directory | Where-Object Name -Match "kt" | Select-Object -First 1
+if (-not $outputFolder) { throw "Gorsel klasoru bulunamadi." }
+$image = Join-Path $outputFolder.FullName "2026-07-21_instagram-carousel-ai-otomasyonlari\instagram-4x5\01_kapak.png"
+if (-not (Test-Path -LiteralPath $image)) { throw "Gorsel bulunamadi: $image" }
+& node.exe publish.mjs --image $image --caption $Caption
