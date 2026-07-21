@@ -15,19 +15,20 @@ export async function POST(request: Request) {
   if (!process.env.OPENAI_API_KEY) return Response.json({ error: "OPENAI_API_KEY yapılandırılmamış." }, { status: 500 });
 
   const conversationId = body.conversationId || crypto.randomUUID();
-  await sql`
-    create table if not exists agent_messages (
-      id bigint generated always as identity primary key,
-      conversation_id uuid not null,
-      agent_id text not null,
-      role text not null check (role in ('user', 'assistant')),
-      content text not null,
-      created_at timestamptz not null default now()
-    )
-  `;
-  await sql`insert into agent_messages (conversation_id, agent_id, role, content) values (${conversationId}, ${agentId}, 'user', ${message})`;
 
   try {
+    await sql`
+      create table if not exists agent_messages (
+        id bigint generated always as identity primary key,
+        conversation_id uuid not null,
+        agent_id text not null,
+        role text not null check (role in ('user', 'assistant')),
+        content text not null,
+        created_at timestamptz not null default now()
+      )
+    `;
+    await sql`insert into agent_messages (conversation_id, agent_id, role, content) values (${conversationId}, ${agentId}, 'user', ${message})`;
+
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const response = await client.responses.create({
       model: "gpt-5.6-sol",
