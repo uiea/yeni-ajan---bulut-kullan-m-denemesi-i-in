@@ -1,0 +1,31 @@
+{
+  "theme": "Küçük işletmeler için yapay zekâ otomasyonları",
+  "account": "@ihmalin_bedeli",
+  "reviewStatus": "draft",
+  "posts": [
+    {
+      "id": "single-ai-workflow",
+      "format": "single-image-caption",
+      "goal": "kaydetme ve profil bilinirliği",
+      "visual": "Minimal teknoloji ve iş akışı temalı dikey görsel",
+      "caption": "Küçük işletmelerde en büyük zaman kaybı, tekrar eden işleri her gün sıfırdan yapmaktır. Yapay zekâ destekli küçük otomasyonlar; müşteri mesajları, içerik planı ve toplantı notlarında düzen sağlar.\n\nİlk adım: her hafta tekrar eden tek bir işi seç ve onu standartlaştır.\n\nKaydet; sonra birlikte uygulayalım.\n\n#yapayzeka #otomasyon #kucukisletme #verimlilik #isakisleri"
+    },
+    {
+      "id": "reel-ai-workflow",
+      "format": "reel",
+      "goal": "izlenme ve kaydetme",
+      "durationSeconds": 15,
+      "hook": "Her gün tekrar ettiğin 3 işi yapay zekâya devret.",
+      "scenes": ["Müşteri mesajları", "Toplantı notları", "İçerik takvimi", "Kaydet ve başla"],
+      "caption": "Yapay zekâ ile başlamak için karmaşık sistemlere gerek yok. Önce en çok tekrar ettiğin üç işi listele: müşteri mesajları, toplantı notları ve içerik takvimi. Sonra yalnızca birini otomatikleştir.\n\n#yapayzeka #otomasyon #verimlilik #reels"
+    },
+    {
+      "id": "carousel-ai-workflow",
+      "format": "carousel",
+      "slides": 6,
+      "goal": "eğitim ve kaydetme",
+      "slidesCopy": ["Küçük işletmeler için 5 yapay zekâ otomasyonu", "1. Müşteri mesajlarını sınıflandır", "2. Toplantı notlarını aksiyona çevir", "3. İçerik fikirlerini takvime yerleştir", "4. Satış fırsatlarını önceliklendir", "5. Bu hafta tek iş seç ve başla"],
+      "caption": "Küçük işletmeler için en etkili yapay zekâ otomasyonları burada. Kaydet ve bu hafta yalnızca bir tanesini uygula.\n\n#yapayzeka #otomasyon #kucukisletme #verimlilik"
+    }
+  ]
+}
