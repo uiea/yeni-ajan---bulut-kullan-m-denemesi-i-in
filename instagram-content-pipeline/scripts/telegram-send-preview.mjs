@@ -38,4 +38,21 @@ if (topicId) {
 const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body });
 const result = await response.json();
 if (!result.ok) throw new Error('Telegram önizlemesi gönderilemedi.');
+if (topicId) {
+  const statePath = path.join(root, 'data', 'telegram-state.json');
+  if (fs.existsSync(statePath)) {
+    const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+    const topic = state.topics[topicId];
+    if (topic?.progressMessageId) {
+      const completed = '█'.repeat(10);
+      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/editMessageText`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ chat_id: env.TELEGRAM_ALLOWED_CHAT_ID, message_id: topic.progressMessageId, text: `İçerik hazırlanıyor\n[${completed}] %100\nÖnizleme hazır. İnceleme ve onayını bekliyor.` })
+      });
+      topic.progress = { percent: 100, label: 'Önizleme hazır.', updatedAt: new Date().toISOString() };
+      fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+    }
+  }
+}
 console.log('Preview sent to allowed Telegram chat.');

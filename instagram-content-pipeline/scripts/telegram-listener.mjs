@@ -36,6 +36,20 @@ const api = async (method, body) => {
 };
 const reply = (chatId, text, keyboard) => api('sendMessage', { chat_id: chatId, text, reply_markup: keyboard ? { inline_keyboard: keyboard } : undefined });
 const chooseOverlay = (id) => [[{ text: 'Görsel üstü metin: evet', callback_data: `overlay:yes:${id}` }], [{ text: 'Görsel üstü metin: hayır', callback_data: `overlay:no:${id}` }]];
+const progressText = (percent, label) => {
+  const completed = Math.round(percent / 10);
+  return `İçerik hazırlanıyor\n[${'█'.repeat(completed)}${'░'.repeat(10 - completed)}] %${percent}\n${label}`;
+};
+const updateProgress = async (topic, percent, label) => {
+  topic.progress = { percent, label, updatedAt: new Date().toISOString() };
+  const text = progressText(percent, label);
+  if (topic.progressMessageId) {
+    await api('editMessageText', { chat_id: topic.chatId, message_id: topic.progressMessageId, text }).catch(() => {});
+  } else {
+    const message = await reply(topic.chatId, text);
+    topic.progressMessageId = message.message_id;
+  }
+};
 const updateCaptionSection = (topic, section, value) => {
   if (!topic.captionPath) throw new Error('Bu konu için henüz açıklama paketi oluşturulmadı.');
   const captionPath = path.join(root, topic.captionPath);
@@ -68,10 +82,12 @@ async function handleCallback(callback) {
     topic.durationSeconds = topic.format === 'reel' ? 15 : null;
     topic.status = 'brief-ready';
     enqueuePreview(topicId);
+    await updateProgress(topic, 70, 'İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.');
     return reply(chatId, `Otomatik mod seçildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}.\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
   }
   if (action === 'guided') {
     topic.mode = 'guided'; topic.status = 'awaiting-format';
+    await updateProgress(topic, 25, 'İçerik türü seçimi bekleniyor.');
     return reply(chatId, '1/3 - Hangi formatı istiyorsun?', [
       [{ text: 'Tek görsel', callback_data: `format:single-image:${topicId}` }, { text: 'Görsel + açıklama', callback_data: `format:single-image-caption:${topicId}` }],
       [{ text: 'Carousel', callback_data: `format:carousel:${topicId}` }, { text: 'Reel', callback_data: `format:reel:${topicId}` }]
@@ -79,6 +95,7 @@ async function handleCallback(callback) {
   }
   if (action === 'format') {
     topic.format = value;
+    await updateProgress(topic, 45, 'İçerik biçimi kaydedildi. Görsel ayarları belirleniyor.');
     if (value === 'carousel') {
       topic.status = 'awaiting-slides';
       return reply(chatId, '2/3 - Carousel kaç slayt olsun?', [[4, 6, 8, 10].map((n) => ({ text: `${n} slayt`, callback_data: `slides:${n}:${topicId}` }))]);
@@ -95,6 +112,7 @@ async function handleCallback(callback) {
   if (action === 'overlay') {
     topic.textOnVisual = value === 'yes'; topic.status = 'brief-ready';
     enqueuePreview(topicId);
+    await updateProgress(topic, 70, 'İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.');
     return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
   }
   if (action === 'review') {
@@ -157,9 +175,15 @@ async function processUpdates(timeout = 0) {
         }
         }
         else {
-        const id = String(update.update_id);
-        state.topics[id] = { topic: text, receivedAt: new Date().toISOString(), chatId: message.chat.id, status: 'awaiting-mode' };
-        await reply(message.chat.id, `Konu alındı:\n${text}\n\nNasıl ilerleyelim?`, [[{ text: 'Otomatik oluştur', callback_data: `auto:${id}` }], [{ text: 'Adım adım oluştur', callback_data: `guided:${id}` }]]);
+          const topicText = text.replace(/^konu\s*:\s*/i, '').trim();
+          if (!/^konu\s*:/i.test(text) || !topicText) {
+            await reply(message.chat.id, 'Yeni içerik başlatmak için mesajını şu biçimde gönder: \n\nkonu: yapay zekânın iş hayatına etkisi');
+          } else {
+            const id = String(update.update_id);
+            state.topics[id] = { topic: topicText, receivedAt: new Date().toISOString(), chatId: message.chat.id, status: 'awaiting-mode' };
+            await updateProgress(state.topics[id], 10, 'Konu alındı. İçerik tercihi bekleniyor.');
+            await reply(message.chat.id, `Konu alındı:\n${topicText}\n\nNasıl ilerleyelim?`, [[{ text: 'Otomatik oluştur', callback_data: `auto:${id}` }], [{ text: 'Adım adım oluştur', callback_data: `guided:${id}` }]]);
+          }
         }
       }
     }

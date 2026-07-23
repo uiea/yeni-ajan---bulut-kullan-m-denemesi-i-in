@@ -2,10 +2,16 @@
   "jobs": [
     {
       "topicId": "753570422",
-      "status": "ready-to-send",
+      "status": "archived",
+      "archivedReason": "Yeni uçtan uca test öncesi önceki deneme paketi",
       "queuedAt": "2026-07-24T00:00:00.000Z",
       "asset": "packages/telegram-753570422/single-image-preview.png",
       "caption": "Önizleme: yapay zeka ile ilgili ilgi çekici bir görsel. Başlık önerisi: Yapay Zekâ: Yeni Dünyanın Gücü. Düzeltme veya onay komutu verebilirsin."
+    },
+    {
+      "topicId": "753570443",
+      "status": "queued",
+      "queuedAt": "2026-07-23T21:38:51.043Z"
     }
   ]
 }

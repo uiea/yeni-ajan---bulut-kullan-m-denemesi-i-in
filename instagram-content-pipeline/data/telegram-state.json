@@ -1,5 +1,5 @@
 {
-  "offset": 753570441,
+  "offset": 753570445,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -17,6 +17,22 @@
       "receivedAt": "2026-07-23T21:24:38.980Z",
       "chatId": 8339222977,
       "status": "awaiting-mode"
+    },
+    "753570441": {
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T21:36:27.340Z",
+      "chatId": 8339222977,
+      "status": "awaiting-mode"
+    },
+    "753570443": {
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T21:38:39.819Z",
+      "chatId": 8339222977,
+      "status": "brief-ready",
+      "mode": "auto",
+      "format": "single-image-caption",
+      "slides": null,
+      "durationSeconds": null
     }
   }
 }
