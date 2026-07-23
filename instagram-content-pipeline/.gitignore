@@ -1,0 +1,5 @@
+.env.local
+data/telegram-state.json
+data/preview-queue.json
+library/asset-index.json
+packages/
