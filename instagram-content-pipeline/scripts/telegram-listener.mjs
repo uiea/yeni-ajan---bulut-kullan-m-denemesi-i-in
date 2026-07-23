@@ -36,6 +36,11 @@ const api = async (method, body) => {
 };
 const reply = (chatId, text, keyboard) => api('sendMessage', { chat_id: chatId, text, reply_markup: keyboard ? { inline_keyboard: keyboard } : undefined });
 const chooseOverlay = (id) => [[{ text: 'Görsel üstü metin: evet', callback_data: `overlay:yes:${id}` }], [{ text: 'Görsel üstü metin: hayır', callback_data: `overlay:no:${id}` }]];
+const chooseMediaSource = (id) => [
+  [{ text: 'Lisanslı stok medya', callback_data: `source:stock:${id}` }],
+  [{ text: 'Yapay zekâ ile oluştur', callback_data: `source:ai:${id}` }],
+  [{ text: 'Karma kullanım', callback_data: `source:mixed:${id}` }]
+];
 const progressText = (percent, label) => {
   const completed = Math.round(percent / 10);
   return `İçerik hazırlanıyor\n[${'█'.repeat(completed)}${'░'.repeat(10 - completed)}] %${percent}\n${label}`;
@@ -80,15 +85,26 @@ async function handleCallback(callback) {
     topic.format = /adım|liste|rehber|nasıl|ipuç/.test(text) ? 'carousel' : /video|demo|göster|hareket/.test(text) ? 'reel' : 'single-image-caption';
     topic.slides = topic.format === 'carousel' ? 6 : null;
     topic.durationSeconds = topic.format === 'reel' ? 15 : null;
-    topic.status = 'brief-ready';
-    enqueuePreview(topicId);
-    await updateProgress(topic, 70, 'İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.');
-    return reply(chatId, `Otomatik mod seçildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}.\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
+    topic.status = 'awaiting-source';
+    await updateProgress(topic, 30, 'Format belirlendi. Görsel kaynağı seçimi bekleniyor.');
+    return reply(chatId, `Otomatik mod seçildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}.\n\nÖnizleme için hangi kaynağı kullanalım?`, chooseMediaSource(topicId));
   }
   if (action === 'guided') {
-    topic.mode = 'guided'; topic.status = 'awaiting-format';
-    await updateProgress(topic, 25, 'İçerik türü seçimi bekleniyor.');
-    return reply(chatId, '1/3 - Hangi formatı istiyorsun?', [
+    topic.mode = 'guided'; topic.status = 'awaiting-source';
+    await updateProgress(topic, 20, 'Önizleme kaynağı seçimi bekleniyor.');
+    return reply(chatId, '1/4 - Önizleme için hangi kaynağı kullanalım?', chooseMediaSource(topicId));
+  }
+  if (action === 'source') {
+    topic.mediaSource = value;
+    if (topic.mode === 'auto') {
+      topic.status = 'brief-ready';
+      enqueuePreview(topicId);
+      await updateProgress(topic, 70, 'İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.');
+      return reply(chatId, `Kaynak seçildi: ${value === 'stock' ? 'lisanslı stok medya' : value === 'ai' ? 'yapay zekâ ile oluşturma' : 'karma kullanım'}.\n\nHazırlık yüzdesini ilerleme çubuğu mesajından takip edebilirsin.`);
+    }
+    topic.status = 'awaiting-format';
+    await updateProgress(topic, 30, 'Kaynak seçildi. İçerik türü seçimi bekleniyor.');
+    return reply(chatId, '2/4 - Hangi formatı istiyorsun?', [
       [{ text: 'Tek görsel', callback_data: `format:single-image:${topicId}` }, { text: 'Görsel + açıklama', callback_data: `format:single-image-caption:${topicId}` }],
       [{ text: 'Carousel', callback_data: `format:carousel:${topicId}` }, { text: 'Reel', callback_data: `format:reel:${topicId}` }]
     ]);
@@ -98,22 +114,22 @@ async function handleCallback(callback) {
     await updateProgress(topic, 45, 'İçerik biçimi kaydedildi. Görsel ayarları belirleniyor.');
     if (value === 'carousel') {
       topic.status = 'awaiting-slides';
-      return reply(chatId, '2/3 - Carousel kaç slayt olsun?', [[4, 6, 8, 10].map((n) => ({ text: `${n} slayt`, callback_data: `slides:${n}:${topicId}` }))]);
+      return reply(chatId, '3/4 - Carousel kaç slayt olsun?', [[4, 6, 8, 10].map((n) => ({ text: `${n} slayt`, callback_data: `slides:${n}:${topicId}` }))]);
     }
     if (value === 'reel') {
       topic.status = 'awaiting-duration';
-      return reply(chatId, '2/3 - Reel süresi ne olsun?', [[8, 15, 30].map((n) => ({ text: `${n} sn`, callback_data: `duration:${n}:${topicId}` }))]);
+      return reply(chatId, '3/4 - Reel süresi ne olsun?', [[8, 15, 30].map((n) => ({ text: `${n} sn`, callback_data: `duration:${n}:${topicId}` }))]);
     }
     topic.status = 'awaiting-overlay';
-    return reply(chatId, '2/3 - Görselin üzerinde kısa metin olsun mu?', chooseOverlay(topicId));
+    return reply(chatId, '3/4 - Görselin üzerinde kısa metin olsun mu?', chooseOverlay(topicId));
   }
-  if (action === 'slides') { topic.slides = Number(value); topic.status = 'awaiting-overlay'; return reply(chatId, '3/3 - Carousel slaytlarında metin olsun mu?', chooseOverlay(topicId)); }
-  if (action === 'duration') { topic.durationSeconds = Number(value); topic.status = 'awaiting-overlay'; return reply(chatId, '3/3 - Reel üzerinde kısa metin olsun mu?', chooseOverlay(topicId)); }
+  if (action === 'slides') { topic.slides = Number(value); topic.status = 'awaiting-overlay'; return reply(chatId, '4/4 - Carousel slaytlarında metin olsun mu?', chooseOverlay(topicId)); }
+  if (action === 'duration') { topic.durationSeconds = Number(value); topic.status = 'awaiting-overlay'; return reply(chatId, '4/4 - Reel üzerinde kısa metin olsun mu?', chooseOverlay(topicId)); }
   if (action === 'overlay') {
     topic.textOnVisual = value === 'yes'; topic.status = 'brief-ready';
     enqueuePreview(topicId);
     await updateProgress(topic, 70, 'İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.');
-    return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
+    return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nHazırlık yüzdesini ilerleme çubuğu mesajından takip edebilirsin.`);
   }
   if (action === 'review') {
     if (value === 'ready') {

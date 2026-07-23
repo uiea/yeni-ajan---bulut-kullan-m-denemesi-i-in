@@ -1,5 +1,5 @@
 {
-  "offset": 753570445,
+  "offset": 753570451,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -29,6 +29,44 @@
       "receivedAt": "2026-07-23T21:38:39.819Z",
       "chatId": 8339222977,
       "status": "brief-ready",
+      "mode": "auto",
+      "format": "single-image-caption",
+      "slides": null,
+      "durationSeconds": null,
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "updatedAt": "2026-07-23T21:43:33.453Z"
+      },
+      "progressMessageId": 34
+    },
+    "753570447": {
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T21:44:38.714Z",
+      "chatId": 8339222977,
+      "status": "brief-ready",
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "updatedAt": "2026-07-23T21:44:50.606Z"
+      },
+      "progressMessageId": 38,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "slides": null,
+      "durationSeconds": null
+    },
+    "753570449": {
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T21:50:16.807Z",
+      "chatId": 8339222977,
+      "status": "awaiting-source",
+      "progress": {
+        "percent": 30,
+        "label": "Format belirlendi. Görsel kaynağı seçimi bekleniyor.",
+        "updatedAt": "2026-07-23T21:50:19.309Z"
+      },
+      "progressMessageId": 42,
       "mode": "auto",
       "format": "single-image-caption",
       "slides": null,
