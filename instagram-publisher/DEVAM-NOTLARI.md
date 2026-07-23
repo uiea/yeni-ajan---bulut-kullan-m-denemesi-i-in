@@ -31,3 +31,9 @@
 ## Yarın ilk adım
 
 Kullanıcı `BASLAT-TASLAK.cmd` dosyasını yeniden çalıştıracak. Eğer otomasyon yine bir ekranda kalırsa, açık tarayıcıyı kapatmadan ekrandaki metni veya `instagram-publisher/hata-ekrani.png` dosyasını incele. Paylaşım ancak kullanıcı açıkça onaylarsa `--publish` ile yapılabilir.
+
+## 2026-07-23 sonucu
+
+- Kullanıcı, `01_kapak.png` görselinin hazırlanan açıklamayla `@ihmalin_bedeli` hesabından paylaşılmasına açık onay verdi.
+- `--publish` akışı tamamlandı ve Instagram'ın Paylaş komutu gönderildi; otomasyon hata vermeden kapandı.
+- Instagram Web taslak kaydetme seçeneği sunmuyor: çıkış uyarısında yalnızca `Gönderiyi sil?` ve `İptal` vardı. Mobil taslak için Android emülatörü kurulumu denendi fakat BlueStacks kurulumu Windows/winget sürecinde takılı kaldı ve tamamlanmadı.

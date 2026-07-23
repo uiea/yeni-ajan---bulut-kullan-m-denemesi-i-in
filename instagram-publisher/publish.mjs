@@ -96,10 +96,10 @@ if (shouldSaveDraft) {
   // Tarayıcı ve taslak ekranda açık kalsın; kullanıcı pencereyi kapattığında süreç biter.
   await keepBrowserOpen();
 } else {
-  const share = page.getByRole("button", { name: /share|paylaş|Paylaş/i })
-    .or(page.getByText(/^(share|paylaş|Paylaş)$/i));
-  await share.waitFor({ state: "visible", timeout: 30000 });
-  await share.click();
+  // Instagram'ın web arayüzünde üstteki Paylaş bağlantısı bazı hesaplarda
+  // erişilebilir bir button/link rolü taşımıyor. Sabit penceredeki konumu kullan.
+  await page.waitForTimeout(1000);
+  await page.mouse.click(1108, 108);
   console.log("Paylaş komutu gönderildi.");
   await page.waitForTimeout(5000);
   await browser.close();
