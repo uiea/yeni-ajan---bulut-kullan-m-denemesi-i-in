@@ -36,6 +36,18 @@
     "maxCandidatesPerSearch": 6,
     "maxDownloadsPerTopic": 3
   },
+  "compliance": {
+    "requireProvenance": true,
+    "requireCreatorAndLicenseNote": true,
+    "requireAttributionWhereProviderRequiresIt": true,
+    "blockUnlicensedMusic": true,
+    "blockTrademarkOrLogoUse": true,
+    "blockSensitivePersonContext": true,
+    "blockBulkDownloading": true,
+    "blockAutomatedMassEngagement": true,
+    "humanReviewBeforeExternalAction": true,
+    "retainSourceMetadataDays": 365
+  },
   "telegram": {
     "maxTopicsPerDay": 5,
     "allowedChatIdsRequired": true
@@ -43,6 +55,9 @@
   "instagram": {
     "maxPreparedPostsPerDay": 2,
     "maxPublishedPostsPerDay": 1,
-    "humanReviewRequired": true
+    "humanReviewRequired": true,
+    "scheduleOnlyViaOfficialApi": true,
+    "requireAltText": true,
+    "requireNoClaimsReview": true
   }
 }

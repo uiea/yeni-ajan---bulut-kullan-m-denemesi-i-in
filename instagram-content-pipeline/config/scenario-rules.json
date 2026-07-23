@@ -1,0 +1,40 @@
+{
+  "formats": {
+    "single-image": {
+      "label": "Tek görsel",
+      "slides": 1,
+      "dimensions": "1080x1350",
+      "bestFor": ["duyuru", "ilham", "tek mesaj", "marka bilinirliği"]
+    },
+    "single-image-caption": {
+      "label": "Tek görsel + açıklama",
+      "slides": 1,
+      "dimensions": "1080x1350",
+      "bestFor": ["kısa bilgi", "ürün", "teklif", "hikâye"]
+    },
+    "carousel": {
+      "label": "Carousel",
+      "dimensions": "1080x1350",
+      "slideRules": {
+        "quick": 4,
+        "standard": 6,
+        "deep": 8,
+        "maximum": 10
+      },
+      "bestFor": ["adım adım", "liste", "eğitim", "karşılaştırma"]
+    },
+    "reel": {
+      "label": "Reel",
+      "durationSeconds": { "short": 8, "standard": 15, "extended": 30 },
+      "dimensions": "1080x1920",
+      "bestFor": ["demonstrasyon", "hikâye", "hareketli içerik"]
+    }
+  },
+  "autoSelection": {
+    "singleMessage": "single-image-caption",
+    "educational": "carousel",
+    "stepByStep": "carousel",
+    "dynamic": "reel",
+    "fallback": "single-image-caption"
+  }
+}

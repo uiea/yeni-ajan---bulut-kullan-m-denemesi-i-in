@@ -1,0 +1,10 @@
+{
+  "assetCooldownDays": 30,
+  "sameVariantCooldownDays": 90,
+  "maxDerivativesPerAsset": 4,
+  "maxAssetsPerContentPackage": 3,
+  "allowFormats": {
+    "image": ["single-image", "carousel", "reel-cover"],
+    "video": ["reel", "story"]
+  }
+}
