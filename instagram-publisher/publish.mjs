@@ -8,6 +8,7 @@ const value = (name) => args[args.indexOf(name) + 1];
 const image = value("--image");
 const caption = value("--caption") ?? "";
 const shouldPublish = args.includes("--publish");
+const shouldSaveDraft = args.includes("--save-draft");
 
 if (!image || !fs.existsSync(image)) {
   console.error("Kullanım: npm run publish -- --image <görsel-yolu> --caption <metin> [--publish]");
@@ -35,7 +36,10 @@ if (await page.getByText(/Log in|Giriş yap/i).count()) {
 // Instagram, girişten sonra güvenlik kontrolleri ve One Tap ekranları gösterebilir.
 // Ana menünün gerçekten hazır olmasını beklemeden dosya seçiciyi arama.
 await page.waitForTimeout(3000);
-const create = page.getByRole("link", { name: /create|oluştur/i }).or(page.getByRole("button", { name: /create|oluştur/i }));
+const create = page.locator('a[href^="/create/select/"]')
+  .or(page.locator('svg[aria-label="New post"], svg[aria-label="Yeni gönderi"], svg[aria-label="Create"], svg[aria-label="Oluştur"]').locator('xpath=..'))
+  .or(page.getByRole("link", { name: /create|oluştur|new post|yeni gönderi/i }))
+  .or(page.getByRole("button", { name: /create|oluştur|new post|yeni gönderi/i }));
 await create.first().waitFor({ state: "visible", timeout: 60000 });
 await create.first().click();
 await page.waitForTimeout(500);
@@ -56,7 +60,8 @@ await fileInput.waitFor({ state: "attached", timeout: 60000 });
 await fileInput.setInputFiles(path.resolve(image));
 
 for (let i = 0; i < 2; i += 1) {
-  const next = page.getByRole("button", { name: /next|ileri/i });
+  const next = page.getByRole("button", { name: /next|ileri|İleri/i })
+    .or(page.getByText(/^(next|ileri|İleri)$/i));
   await next.waitFor({ state: "visible", timeout: 30000 });
   await next.click();
 }
@@ -65,9 +70,24 @@ const captionBox = page.locator('textarea').or(page.locator('[contenteditable="t
 await captionBox.first().waitFor({ state: "visible", timeout: 30000 });
 await captionBox.first().fill(caption);
 
-if (!shouldPublish) {
+if (shouldSaveDraft) {
+  // Instagram Web taslağı, paylaşım ekranından kapatma isteği gönderildiğinde
+  // açılan "Taslağı kaydet" onayıyla saklanır.
+  await page.screenshot({ path: "taslak-onizleme.png", fullPage: true });
+  const dialog = page.locator('[role="dialog"]').last();
+  const close = dialog.locator('[aria-label="Close"], [aria-label="Kapat"]').first();
+  await close.waitFor({ state: "visible", timeout: 30000 });
+  await close.click();
+  const saveDraft = page.getByRole("button", { name: /save draft|taslağı kaydet|taslak olarak kaydet/i })
+    .or(page.getByText(/save draft|taslağı kaydet|taslak olarak kaydet/i));
+  await saveDraft.first().waitFor({ state: "visible", timeout: 30000 });
+  await saveDraft.first().click();
+  console.log("Gönderi Instagram taslaklarına kaydedildi. Yayın yapılmadı.");
+  await page.waitForTimeout(3000);
+  await browser.close();
+} else if (!shouldPublish) {
   console.log("Gönderi hazırlandı. Tarayıcıdaki Paylaş düğmesine basılmadı.");
-  console.log("Paylaşmak için aynı komutu --publish parametresiyle, açık onaydan sonra çalıştır.");
+  console.log("Taslak kaydı için --save-draft, paylaşım için --publish parametresi gerekir.");
   // Tarayıcı ve taslak ekranda açık kalsın; kullanıcı pencereyi kapattığında süreç biter.
   await keepBrowserOpen();
 } else {
