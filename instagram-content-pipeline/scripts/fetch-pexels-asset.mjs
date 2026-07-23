@@ -39,7 +39,7 @@ const policy = JSON.parse(fs.readFileSync(path.join(root, 'config', 'free-tier-p
 const uniqueness = JSON.parse(fs.readFileSync(path.join(root, 'config', 'content-uniqueness-policy.json'), 'utf8'));
 const historyPath = path.join(root, 'data', 'content-history.json');
 const history = fs.existsSync(historyPath) ? JSON.parse(fs.readFileSync(historyPath, 'utf8')) : { entries: [] };
-const usedSourceIds = new Set(history.entries.map((entry) => String(entry.source?.assetId ?? '')).filter(Boolean));
+const usedSourceIds = new Set([...history.entries.map((entry) => String(entry.source?.assetId ?? '')), ...(topic.rejectedAssetIds ?? []).map(String)].filter(Boolean));
 const chooseCandidate = (photos) => {
   const filtered = photos
     .filter((photo) => !unwantedVisualTextTerms.test(`${photo.alt ?? ''} ${photo.url ?? ''}`))
@@ -136,8 +136,9 @@ fs.writeFileSync(transformationsPath, JSON.stringify({
   operations: [],
   policy: 'config/media-sanitization-policy.json'
 }, null, 2));
-topic.status = 'asset-ready';
+topic.status = 'awaiting-asset-approval';
 topic.asset = { provider: 'pexels', filePath: provenance.localFile, provenancePath: path.relative(root, path.join(packageDir, 'provenance.json')), transformationsPath: path.relative(root, transformationsPath) };
+topic.assetCandidate = { provider: 'Pexels', assetId: String(photo.id), filePath: provenance.localFile, sourceUrl: photo.url };
 fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 await reportProgress(root, topicId, 92, 'Kaynak görsel hazır.', [
   'Görsel uygunluk kontrolünden geçti',

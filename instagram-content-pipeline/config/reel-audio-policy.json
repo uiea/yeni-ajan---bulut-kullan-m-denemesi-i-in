@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "primarySource": "pixabay-music",
+  "fallbackSource": "youtube-audio-library-manual-import",
+  "ranking": ["popular", "topic-mood-match", "duration-match", "not-used-before"],
+  "requireTrackApproval": true,
+  "allowTrackReplacementBeforePublish": true,
+  "requireProvenance": true,
+  "requireAttributionWhenLicenseRequires": true,
+  "exclude": ["unlicensed", "commercial-instagram-library-downloads", "unknown-license", "standalone-audio-publication"],
+  "reelDefaults": { "width": 1080, "height": 1920, "durationSeconds": 15, "audioVolume": 0.16, "fadeInSeconds": 0.5, "fadeOutSeconds": 1 }
+}

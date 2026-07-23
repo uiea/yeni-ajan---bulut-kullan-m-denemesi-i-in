@@ -28,10 +28,10 @@ const save = () => {
   fs.writeFileSync(statePath, JSON.stringify(merged, null, 2));
 };
 const previewQueuePath = path.join(root, 'data', 'preview-queue.json');
-const enqueuePreview = (topicId) => {
+const enqueuePreview = (topicId, stage = 'candidate') => {
   const queue = fs.existsSync(previewQueuePath) ? JSON.parse(fs.readFileSync(previewQueuePath, 'utf8')) : { jobs: [] };
   if (!queue.jobs.some((job) => job.topicId === topicId && ['queued', 'processing'].includes(job.status))) {
-    queue.jobs.push({ topicId, status: 'queued', queuedAt: new Date().toISOString() });
+    queue.jobs.push({ topicId, stage, status: 'queued', queuedAt: new Date().toISOString() });
     fs.mkdirSync(path.dirname(previewQueuePath), { recursive: true });
     fs.writeFileSync(previewQueuePath, JSON.stringify(queue, null, 2));
   }
@@ -242,6 +242,23 @@ async function handleCallback(callback) {
     enqueuePreview(topicId);
     await updateProgress(topic, 70, 'İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.');
     return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nHazırlık yüzdesini ilerleme çubuğu mesajından takip edebilirsin.`);
+  }
+  if (action === 'asset') {
+    if (value === 'approve') {
+      topic.status = 'brief-ready';
+      enqueuePreview(topicId, 'render');
+      await updateProgress(topic, 88, 'Görsel onaylandı. Metin ve paylaşım önizlemesi hazırlanıyor.');
+      return reply(chatId, 'Görsel onaylandı. Açıklama, CTA ve hashtag paketi hazırlanacak.');
+    }
+    if (value === 'next') {
+      topic.rejectedAssetIds = [...new Set([...(topic.rejectedAssetIds ?? []), topic.assetCandidate?.assetId].filter(Boolean))];
+      topic.asset = undefined;
+      topic.assetCandidate = undefined;
+      topic.status = 'brief-ready';
+      enqueuePreview(topicId, 'candidate');
+      await updateProgress(topic, 72, 'Görsel reddedildi. Farklı aday aranıyor.');
+      return reply(chatId, 'Bu görsel kullanılmayacak. Yeni aday aranıyor.');
+    }
   }
   if (action === 'review') {
     if (value === 'publish-request') {

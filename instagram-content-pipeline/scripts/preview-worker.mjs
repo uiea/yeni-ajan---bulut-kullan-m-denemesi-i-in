@@ -41,7 +41,13 @@ async function processOne() {
   try {
     if (!['stock', 'mixed'].includes(topic.mediaSource)) throw new Error('Yapay zekâ görsel sağlayıcısı henüz yapılandırılmadı.');
     await reportProgress(root, job.topicId, 72, 'Önizleme işçisi başlatıldı.', ['Kuyruktaki iş işleniyor', `Medya kaynağı: ${topic.mediaSource}`], 10, 'İşçi hazırlığı');
-    await run(process.execPath, ['scripts/fetch-pexels-asset.mjs', job.topicId]);
+    if ((job.stage ?? 'candidate') === 'candidate') {
+      await run(process.execPath, ['scripts/fetch-pexels-asset.mjs', job.topicId]);
+      const candidate = loadState().topics[job.topicId];
+      await run(process.execPath, ['scripts/telegram-send-media-candidate.mjs', candidate.asset.filePath, job.topicId]);
+      markJob(job, 'awaiting-asset-approval', { completedAt: new Date().toISOString(), candidateAssetId: candidate.assetCandidate?.assetId });
+      return true;
+    }
     const updated = loadState().topics[job.topicId];
     await run(process.execPath, ['scripts/build-caption.mjs', job.topicId]);
     const afterCopy = loadState().topics[job.topicId];
