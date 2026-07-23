@@ -83,6 +83,7 @@ async function handleCallback(callback) {
     const text = topic.topic.toLocaleLowerCase('tr-TR');
     topic.mode = 'auto';
     topic.format = /adım|liste|rehber|nasıl|ipuç/.test(text) ? 'carousel' : /video|demo|göster|hareket/.test(text) ? 'reel' : 'single-image-caption';
+    topic.textOnVisual = topic.format === 'single-image-caption';
     topic.slides = topic.format === 'carousel' ? 6 : null;
     topic.durationSeconds = topic.format === 'reel' ? 15 : null;
     topic.status = 'awaiting-source';

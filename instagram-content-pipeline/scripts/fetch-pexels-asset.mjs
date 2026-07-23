@@ -26,12 +26,18 @@ if (!topic) throw new Error('Konu bulunamadı.');
 if (!['stock', 'mixed'].includes(topic.mediaSource)) throw new Error('Bu konu stok medya kullanacak şekilde seçilmedi.');
 const buildSearchQuery = (text) => {
   const normalized = text.toLocaleLowerCase('tr-TR');
-  if (/yapay zek|artificial intelligence|\bai\b/.test(normalized)) return 'artificial intelligence technology neural network';
+  if (/yapay zek|artificial intelligence|\bai\b/.test(normalized)) return 'futuristic abstract blue light waves background';
   if (/iş hayat|kariyer|çalışma hayat/.test(normalized)) return 'modern business workplace';
   if (/sağlık|tıp|medikal/.test(normalized)) return 'healthcare technology';
   if (/eğitim|öğrenme/.test(normalized)) return 'education learning technology';
   if (/finans|ekonomi|yatırım/.test(normalized)) return 'finance technology data';
   return text;
+};
+const unwantedVisualTextTerms = /\b(text|code|coding|programming|screen|monitor|sign|signage|logo|letter|word|keyboard|terminal)\b/i;
+const chooseCandidate = (photos) => {
+  const filtered = photos.filter((photo) => !unwantedVisualTextTerms.test(`${photo.alt ?? ''} ${photo.url ?? ''}`));
+  const portrait = filtered.filter((photo) => photo.height >= photo.width);
+  return (portrait[0] ?? filtered[0] ?? null);
 };
 
 const policy = JSON.parse(fs.readFileSync(path.join(root, 'config', 'free-tier-policy.json'), 'utf8'));
@@ -65,7 +71,8 @@ const payload = await search.json();
 if (!search.ok || !payload.photos?.length) throw new Error('Pexels uygun görsel döndürmedi.');
 recordQuota(searchQuota);
 
-const photo = payload.photos.find((item) => item.height >= item.width) ?? payload.photos[0];
+const photo = chooseCandidate(payload.photos);
+if (!photo) throw new Error('Pexels adaylarının tamamı görsel metin/ekran riski nedeniyle elendi. Yeni arama terimi gerekir.');
 const imageUrl = photo.src.large2x ?? photo.src.large;
 const downloadQuota = ensureQuota('download');
 const assetResponse = await fetch(imageUrl);
@@ -87,10 +94,23 @@ const provenance = {
   retrievedAt: new Date().toISOString(),
   query: topic.topic,
   providerSearchQuery: searchQuery,
+  candidateReview: {
+    candidatesReturned: payload.photos.length,
+    candidatesRejectedForMetadataRisk: payload.photos.filter((item) => unwantedVisualTextTerms.test(`${item.alt ?? ''} ${item.url ?? ''}`)).map((item) => item.id),
+    selectedCandidateId: photo.id,
+    rule: 'Prefer portrait candidates without metadata indicators of visible text, code, screens, signs, or logos.'
+  },
   localFile: path.relative(root, filePath)
 };
 fs.writeFileSync(path.join(packageDir, 'provenance.json'), JSON.stringify(provenance, null, 2));
+const transformationsPath = path.join(packageDir, 'transformations.json');
+fs.writeFileSync(transformationsPath, JSON.stringify({
+  sourceFile: provenance.localFile,
+  sanitizationStatus: 'pending-visual-review',
+  operations: [],
+  policy: 'config/media-sanitization-policy.json'
+}, null, 2));
 topic.status = 'asset-ready';
-topic.asset = { provider: 'pexels', filePath: provenance.localFile, provenancePath: path.relative(root, path.join(packageDir, 'provenance.json')) };
+topic.asset = { provider: 'pexels', filePath: provenance.localFile, provenancePath: path.relative(root, path.join(packageDir, 'provenance.json')), transformationsPath: path.relative(root, transformationsPath) };
 fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 console.log(JSON.stringify({ topicId, filePath: provenance.localFile, provenance }, null, 2));

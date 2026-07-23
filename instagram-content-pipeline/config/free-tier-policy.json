@@ -42,6 +42,7 @@
     "requireAttributionWhereProviderRequiresIt": true,
     "blockUnlicensedMusic": true,
     "blockTrademarkOrLogoUse": true,
+    "neverRemoveWatermarksOrCopyrightNotices": true,
     "blockSensitivePersonContext": true,
     "blockBulkDownloading": true,
     "blockAutomatedMassEngagement": true,

@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "pipelineOrder": [
+    "candidate-metadata-filter",
+    "visual-review",
+    "safe-crop",
+    "ai-cleanup-if-configured",
+    "reject-and-research"
+  ],
+  "allowedTargets": [
+    "empty-margin",
+    "incidental-cable",
+    "unrelated-background-object",
+    "non-semantic-text-created-by-scene"
+  ],
+  "neverAlter": [
+    "watermark",
+    "copyright-notice",
+    "creator-signature",
+    "provider-logo",
+    "third-party-trademark"
+  ],
+  "fallbackWhenUnsafe": "reject-and-search-alternative",
+  "recordEveryTransformation": true
+}

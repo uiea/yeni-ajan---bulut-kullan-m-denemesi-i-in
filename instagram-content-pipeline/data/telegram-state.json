@@ -60,11 +60,11 @@
       "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
       "receivedAt": "2026-07-23T21:50:16.807Z",
       "chatId": 8339222977,
-      "status": "asset-ready",
+      "status": "awaiting-review",
       "progress": {
-        "percent": 70,
-        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
-        "updatedAt": "2026-07-23T21:51:59.153Z"
+        "percent": 100,
+        "label": "Önizleme hazır.",
+        "updatedAt": "2026-07-23T22:18:43.318Z"
       },
       "progressMessageId": 42,
       "mode": "auto",
@@ -72,11 +72,15 @@
       "slides": null,
       "durationSeconds": null,
       "mediaSource": "stock",
+      "textOnVisual": true,
       "asset": {
         "provider": "pexels",
-        "filePath": "packages\\telegram-753570449\\source-pexels.jpg",
+        "filePath": "packages\\telegram-753570449\\source-pexels-19945132.jpg",
         "provenancePath": "packages\\telegram-753570449\\provenance.json"
-      }
+      },
+      "headline": "Yapay Zekâ: Dönüşüm Şimdi Başlıyor",
+      "captionPath": "packages\\telegram-753570449\\caption.txt",
+      "copyVariant": 2
     }
   }
 }
