@@ -24,3 +24,13 @@ node .\scripts\media-source-status.mjs
 ```
 
 `Lisanslı stok medya` seçildiğinde sistem yalnızca hazır olan sağlayıcıları kullanır. Her seçilen varlık için sağlayıcı, içerik bağlantısı, üretici, lisans notu ve indirme zamanı provenance kaydına yazılmalıdır.
+
+## Pexels işçisi
+
+Konu `Lisanslı stok medya` veya `Karma kullanım` ile seçildiğinde Pexels işçisi şu komutla çalışır:
+
+```powershell
+node .\scripts\fetch-pexels-asset.mjs <telegram-konu-id>
+```
+
+İşçi tek arama ve tek indirme yapar; `free-tier-policy.json` içindeki günlük/aylık kotaları uygular. Dosyayı içerik paketine, kaynak bilgisini ise `provenance.json` dosyasına kaydeder.

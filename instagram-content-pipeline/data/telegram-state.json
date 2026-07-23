@@ -60,7 +60,7 @@
       "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
       "receivedAt": "2026-07-23T21:50:16.807Z",
       "chatId": 8339222977,
-      "status": "brief-ready",
+      "status": "asset-ready",
       "progress": {
         "percent": 70,
         "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
@@ -71,7 +71,12 @@
       "format": "single-image-caption",
       "slides": null,
       "durationSeconds": null,
-      "mediaSource": "stock"
+      "mediaSource": "stock",
+      "asset": {
+        "provider": "pexels",
+        "filePath": "packages\\telegram-753570449\\source-pexels.jpg",
+        "provenancePath": "packages\\telegram-753570449\\provenance.json"
+      }
     }
   }
 }
