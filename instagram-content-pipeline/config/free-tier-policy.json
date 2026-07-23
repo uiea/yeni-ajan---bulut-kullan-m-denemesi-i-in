@@ -3,28 +3,38 @@
   "sources": {
     "pexels": {
       "enabled": true,
-      "dailySearches": 12,
-      "dailyDownloads": 6,
-      "monthlySearches": 200,
-      "monthlyDownloads": 100,
+      "mediaTypes": ["image", "video"],
+      "dailySearches": 20,
+      "dailyDownloads": 10,
+      "monthlySearches": 400,
+      "monthlyDownloads": 200,
       "cacheHours": 168
     },
     "pixabay": {
       "enabled": true,
-      "dailySearches": 8,
-      "dailyDownloads": 4,
-      "monthlySearches": 120,
-      "monthlyDownloads": 60,
+      "mediaTypes": ["image", "video"],
+      "dailySearches": 15,
+      "dailyDownloads": 8,
+      "monthlySearches": 300,
+      "monthlyDownloads": 150,
       "cacheHours": 168
     },
     "unsplash": {
-      "enabled": false,
-      "dailySearches": 4,
-      "dailyDownloads": 2,
-      "monthlySearches": 40,
-      "monthlyDownloads": 20,
+      "enabled": true,
+      "mediaTypes": ["image"],
+      "dailySearches": 15,
+      "dailyDownloads": 8,
+      "monthlySearches": 300,
+      "monthlyDownloads": 150,
       "cacheHours": 168
     }
+  },
+  "sourceRotation": {
+    "single-image": ["unsplash", "pexels", "pixabay"],
+    "carousel": ["unsplash", "pexels", "pixabay"],
+    "reel": ["pexels", "pixabay"],
+    "maxCandidatesPerSearch": 6,
+    "maxDownloadsPerTopic": 3
   },
   "telegram": {
     "maxTopicsPerDay": 5,
