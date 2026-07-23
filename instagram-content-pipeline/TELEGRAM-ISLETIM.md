@@ -24,9 +24,9 @@ Seçimler tamamlandığında sistem şu paketi oluşturur ve Telegram incelemesi
 - görsel, carousel ya da reel önizlemesi;
 - açıklama metni;
 - konuya uygun, sınırlı hashtag seti;
-- `Instagram için hazırla` ve `Düzeltme iste` butonları.
+- `Instagram’da yayınla` ve `Düzeltme iste` butonları.
 
-`Instagram için hazırla` yalnızca taslağın yayınlanmaya hazır olduğunu kaydeder. Instagram'a yükleme veya paylaşım yapmaz; bu işlem için ayrıca açık onay gerekir.
+`Instagram’da yayınla` ilk basışta görsel, açıklama paketi ve hedef hesabı gösteren son onay ekranını açar. `Evet, Instagram’da yayınla` düğmesi ise yerel Instagram yayın aracını başlatır. Bu iki aşamalı akış yanlışlıkla yayın yapılmasını önler.
 
 ### Metni kendin değiştirme
 

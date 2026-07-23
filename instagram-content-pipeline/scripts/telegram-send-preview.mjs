@@ -31,7 +31,7 @@ body.set('caption', caption.slice(0, 1024));
 body.set('photo', new Blob([fs.readFileSync(file)]), path.basename(file));
 if (topicId) {
   body.set('reply_markup', JSON.stringify({ inline_keyboard: [
-    [{ text: 'Instagram için hazırla', callback_data: `review:ready:${topicId}` }],
+    [{ text: 'Instagram’da yayınla', callback_data: `review:publish-request:${topicId}` }],
     [{ text: 'Düzeltme iste', callback_data: `review:revise:${topicId}` }]
   ] }));
 }
@@ -43,6 +43,7 @@ if (topicId) {
   if (fs.existsSync(statePath)) {
     const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
     const topic = state.topics[topicId];
+    if (topic) topic.previewFilePath = path.relative(root, path.resolve(file));
     if (topic?.progressMessageId) {
       const completed = '█'.repeat(10);
       await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/editMessageText`, {
@@ -51,8 +52,8 @@ if (topicId) {
         body: JSON.stringify({ chat_id: env.TELEGRAM_ALLOWED_CHAT_ID, message_id: topic.progressMessageId, text: `İçerik hazırlanıyor\n[${completed}] %100\nÖnizleme hazır. İnceleme ve onayını bekliyor.` })
       });
       topic.progress = { percent: 100, label: 'Önizleme hazır.', updatedAt: new Date().toISOString() };
-      fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
     }
+    fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
   }
 }
 console.log('Preview sent to allowed Telegram chat.');

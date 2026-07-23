@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 
 const root = path.resolve(import.meta.dirname, '..');
 const env = {};
@@ -16,7 +17,16 @@ if (!token || !allowedChatId) throw new Error('Telegram token veya izinli chat I
 
 const statePath = path.join(root, 'data', 'telegram-state.json');
 const state = fs.existsSync(statePath) ? JSON.parse(fs.readFileSync(statePath, 'utf8')) : { offset: 0, topics: {} };
-const save = () => { fs.mkdirSync(path.dirname(statePath), { recursive: true }); fs.writeFileSync(statePath, JSON.stringify(state, null, 2)); };
+const save = () => {
+  const disk = fs.existsSync(statePath) ? JSON.parse(fs.readFileSync(statePath, 'utf8')) : { offset: 0, topics: {} };
+  const mergedTopics = { ...disk.topics };
+  for (const [topicId, memoryTopic] of Object.entries(state.topics)) {
+    mergedTopics[topicId] = { ...(disk.topics?.[topicId] ?? {}), ...memoryTopic };
+  }
+  const merged = { ...disk, ...state, topics: mergedTopics, offset: state.offset };
+  fs.mkdirSync(path.dirname(statePath), { recursive: true });
+  fs.writeFileSync(statePath, JSON.stringify(merged, null, 2));
+};
 const previewQueuePath = path.join(root, 'data', 'preview-queue.json');
 const enqueuePreview = (topicId) => {
   const queue = fs.existsSync(previewQueuePath) ? JSON.parse(fs.readFileSync(previewQueuePath, 'utf8')) : { jobs: [] };
@@ -68,6 +78,45 @@ const updateCaptionSection = (topic, section, value) => {
     const copy = hashtagIndex >= 0 ? paragraphs.slice(0, hashtagIndex).join('\n\n') : current.trim();
     fs.writeFileSync(captionPath, `${copy}\n\n${value.trim()}\n`, 'utf8');
   }
+};
+const resumeInstruction = (topic) => {
+  const instructions = {
+    'awaiting-mode': 'Eksik adım: Otomatik oluştur veya Adım adım oluştur seçimi.',
+    'awaiting-source': 'Eksik adım: Lisanslı stok medya, Yapay zekâ ile oluştur veya Karma kullanım seçimi.',
+    'awaiting-format': 'Eksik adım: Tek görsel, carousel veya reel formatını seçme.',
+    'awaiting-slides': 'Eksik adım: Carousel slayt sayısını seçme.',
+    'awaiting-duration': 'Eksik adım: Reel süresini seçme.',
+    'awaiting-overlay': 'Eksik adım: Görsel üstü metin tercihini seçme.',
+    'brief-ready': 'Eksik adım: Medya işçisinin uygun kaynağı getirip önizlemeyi oluşturması.',
+    'asset-ready': 'Eksik adım: Görselin başlık ve açıklama paketiyle önizleme olarak render edilmesi.',
+    'awaiting-review': 'Önizleme hazır. Eksik adım: Telegram’daki önizlemeyi inceleme, düzeltme veya yayın isteği.',
+    'revision-requested': 'Düzeltme kaydedildi. Eksik adım: Güncel önizleme paketinin yeniden gönderilmesi.',
+    'awaiting-publish-confirmation': 'Yayın onayı bekleniyor. Telegram’daki Evet, Instagram’da yayınla düğmesine bas.',
+    'publish-started': 'Instagram yayın aracı başlatıldı. Eksik adım: Tarayıcıdaki Instagram işleminin tamamlanması.',
+    'instagram-ready': 'Taslak hazır. Eksik adım: Instagram’da yayınla isteği.',
+    'cancelled': 'Bu çalışma iptal edildi. Yeni bir içerik için konu: ile başlayan mesaj gönder.'
+  };
+  return instructions[topic.status] ?? `Durum: ${topic.status}`;
+};
+const showStatus = async (chatId) => {
+  const latest = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(chatId));
+  if (!latest) return reply(chatId, 'Aktif içerik bulunmuyor. Yeni içerik için konu: ile başlayan mesaj gönder.');
+  const [topicId, topic] = latest;
+  const progress = topic.progress ? `\nİlerleme: %${topic.progress.percent} — ${topic.progress.label}` : '';
+  return reply(chatId, `Çalışma durumu\nKonu: ${topic.topic}\nKimlik: ${topicId}\nAşama: ${topic.status}${progress}\n\n${resumeInstruction(topic)}`);
+};
+const startInstagramPublish = (topic) => {
+  if (!topic.previewFilePath || !topic.captionPath) throw new Error('Yayın için görsel veya açıklama paketi eksik.');
+  const publisherDir = path.resolve(root, '..', 'instagram-publisher');
+  const image = path.relative(publisherDir, path.join(root, topic.previewFilePath));
+  const caption = path.relative(publisherDir, path.join(root, topic.captionPath));
+  const child = spawn(process.execPath, ['publish.mjs', '--image', image, '--caption-file', caption, '--publish'], {
+    cwd: publisherDir,
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: false
+  });
+  child.unref();
 };
 
 async function handleCallback(callback) {
@@ -133,6 +182,14 @@ async function handleCallback(callback) {
     return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nHazırlık yüzdesini ilerleme çubuğu mesajından takip edebilirsin.`);
   }
   if (action === 'review') {
+    if (value === 'publish-request') {
+      topic.status = 'awaiting-publish-confirmation';
+      const image = topic.previewFilePath ?? topic.asset?.filePath ?? 'önizleme görseli';
+      return reply(chatId, `Yayın onayı gerekli.\n\nGörsel: ${image}\nAçıklama: ${topic.captionPath ?? 'açıklama paketi'}\nHedef: Bu bilgisayardaki yayıncı profilinde giriş yapılmış Instagram hesabı\n\nBu gönderi herkese açık olarak yayınlanacak.`, [
+        [{ text: 'Evet, Instagram’da yayınla', callback_data: `publish:confirm:${topicId}` }],
+        [{ text: 'Vazgeç', callback_data: `publish:cancel:${topicId}` }]
+      ]);
+    }
     if (value === 'ready') {
       topic.status = 'instagram-ready';
       return reply(chatId, 'Taslak onaylandı ve Instagram için hazır durumuna alındı. Paylaşım yapılmadı; yayınlama öncesinde ayrıca onayın istenecek.');
@@ -159,17 +216,34 @@ async function handleCallback(callback) {
       : (paragraphs.find((paragraph) => paragraph.trim().startsWith('#')) ?? '');
     return reply(chatId, `${value === 'caption' ? 'Yeni açıklamayı' : 'Yeni hashtagleri'} şimdi tek mesaj olarak yaz.\n\nMevcut metin:\n${currentValue}`);
   }
+  if (action === 'publish') {
+    if (value === 'cancel') {
+      topic.status = 'awaiting-review';
+      return reply(chatId, 'Yayın isteği iptal edildi. Taslak inceleme için hazır kalıyor.');
+    }
+    if (value === 'confirm') {
+      try {
+        startInstagramPublish(topic);
+        topic.status = 'publish-started';
+        return reply(chatId, 'Instagram yayın işlemi başlatıldı. Tarayıcıdaki hesabın gönderiyi tamamlamasını bekle.');
+      } catch (error) {
+        topic.status = 'awaiting-publish-confirmation';
+        return reply(chatId, `Yayın başlatılamadı: ${error.message}`);
+      }
+    }
+  }
 }
 
 async function processUpdates(timeout = 0) {
   const updates = await api(`getUpdates?offset=${state.offset}&timeout=${timeout}`);
   for (const update of updates) {
     state.offset = update.update_id + 1;
-    if (update.callback_query) await handleCallback(update.callback_query);
-    const message = update.message;
-    if (message && String(message.chat.id) === allowedChatId && message.text?.trim()) {
-      const text = message.text.trim();
-      if (text === '/start') await reply(message.chat.id, 'Instagram içerik sistemi hazır. Bana konuyu yaz; sonra otomatik veya adım adım seç.');
+    try {
+      if (update.callback_query) await handleCallback(update.callback_query);
+      const message = update.message;
+      if (message && String(message.chat.id) === allowedChatId && message.text?.trim()) {
+        const text = message.text.trim();
+        if (text === '/start' || text === '/durum') await showStatus(message.chat.id);
       else {
         const pendingEdit = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && ['awaiting-caption-edit', 'awaiting-hashtag-edit'].includes(topic.status));
         if (pendingEdit) {
@@ -204,14 +278,25 @@ async function processUpdates(timeout = 0) {
         }
       }
     }
-    save();
+    } catch (error) {
+      console.error(`Telegram güncellemesi işlenemedi: ${error.message}`);
+    } finally {
+      save();
+    }
   }
   return updates.length;
 }
 
 if (process.argv.includes('--watch')) {
   console.log('Telegram dinleyicisi çalışıyor. Durdurmak için Ctrl+C.');
-  while (true) await processUpdates(20);
+  while (true) {
+    try {
+      await processUpdates(20);
+    } catch (error) {
+      console.error(`Telegram dinleyici hatası: ${error.message}`);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+  }
 } else {
   console.log(`Processed ${await processUpdates()} Telegram update(s).`);
 }

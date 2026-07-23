@@ -8,6 +8,8 @@ const root = path.resolve(import.meta.dirname, '..');
 const state = JSON.parse(fs.readFileSync(path.join(root, 'data', 'telegram-state.json'), 'utf8'));
 const topic = state.topics[topicId];
 if (!topic) throw new Error('Konu bulunamadı.');
+const historyPath = path.join(root, 'data', 'copy-history.json');
+const history = fs.existsSync(historyPath) ? JSON.parse(fs.readFileSync(historyPath, 'utf8')) : { entries: [] };
 
 const hash = [...topicId].reduce((total, char) => total + char.charCodeAt(0), 0);
 const topicText = topic.topic.trim();
@@ -51,7 +53,12 @@ const genericVariants = [
     hashtags: '#Fikir #Gelişim #İnovasyon #DijitalDünya #Keşfet'
   }
 ];
-const variant = (isAi ? aiVariants : genericVariants)[hash % (isAi ? aiVariants.length : genericVariants.length)];
+const family = isAi ? 'ai' : 'generic';
+const variants = isAi ? aiVariants : genericVariants;
+const recentVariants = new Set(history.entries.filter((entry) => entry.family === family && entry.topicId !== topicId).slice(-2).map((entry) => entry.variant));
+const preferredVariant = hash % variants.length;
+const variantIndex = topic.copyVariant ?? Array.from({ length: variants.length }, (_, offset) => (preferredVariant + offset) % variants.length).find((index) => !recentVariants.has(index)) ?? preferredVariant;
+const variant = variants[variantIndex];
 const headline = customHeadline ?? variant.headline;
 const caption = `${headline}\n\n${variant.hook}\n\n${variant.body}\n\n${variant.cta}\n\n${variant.hashtags}`;
 const packageDir = path.join(root, 'packages', `telegram-${topicId}`);
@@ -59,8 +66,12 @@ fs.mkdirSync(packageDir, { recursive: true });
 fs.writeFileSync(path.join(packageDir, 'caption.txt'), caption, 'utf8');
 
 topic.headline = headline;
-topic.copyVariant = hash % (isAi ? aiVariants.length : genericVariants.length);
+topic.copyVariant = variantIndex;
 topic.captionPath = path.join('packages', `telegram-${topicId}`, 'caption.txt');
 topic.status = 'awaiting-review';
 fs.writeFileSync(path.join(root, 'data', 'telegram-state.json'), JSON.stringify(state, null, 2));
+history.entries = history.entries.filter((entry) => entry.topicId !== topicId);
+history.entries.push({ topicId, family, variant: variantIndex, generatedAt: new Date().toISOString() });
+history.entries = history.entries.slice(-50);
+fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
 console.log(path.join(packageDir, 'caption.txt'));
