@@ -6,7 +6,8 @@ import process from "node:process";
 const args = process.argv.slice(2);
 const value = (name) => args[args.indexOf(name) + 1];
 const image = value("--image");
-const caption = value("--caption") ?? "";
+const captionFile = value("--caption-file");
+const caption = captionFile ? fs.readFileSync(captionFile, "utf8") : (value("--caption") ?? "");
 const shouldPublish = args.includes("--publish");
 const shouldSaveDraft = args.includes("--save-draft");
 

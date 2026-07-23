@@ -107,8 +107,22 @@ async function handleCallback(callback) {
       const currentCaption = topic.captionPath && fs.existsSync(path.join(root, topic.captionPath))
         ? fs.readFileSync(path.join(root, topic.captionPath), 'utf8').trim()
         : 'Açıklama paketi henüz oluşturulmadı.';
-      return reply(chatId, `Düzeltme isteğin kaydedildi.\n\nMevcut açıklama ve hashtag'ler:\n\n${currentCaption}\n\nDeğiştirmek için metni kopyalayıp düzenle, sonra:\n/aciklama yeni açıklamanın tamamı\n/hashtag #etiket1 #etiket2\n\nkomutlarından uygun olanıyla gönder.`);
+      return reply(chatId, `Düzeltme isteğin kaydedildi.\n\nMevcut açıklama ve hashtag'ler:\n\n${currentCaption}\n\nHangisini değiştirmek istiyorsun?`, [
+        [{ text: '✏️ Açıklamayı düzenle', callback_data: `edit:caption:${topicId}` }],
+        [{ text: '# Hashtagleri düzenle', callback_data: `edit:hashtags:${topicId}` }]
+      ]);
     }
+  }
+  if (action === 'edit') {
+    topic.status = value === 'caption' ? 'awaiting-caption-edit' : 'awaiting-hashtag-edit';
+    const currentCaption = topic.captionPath && fs.existsSync(path.join(root, topic.captionPath))
+      ? fs.readFileSync(path.join(root, topic.captionPath), 'utf8').trim()
+      : '';
+    const paragraphs = currentCaption.split(/\r?\n\r?\n/);
+    const currentValue = value === 'caption'
+      ? paragraphs.filter((paragraph) => !paragraph.trim().startsWith('#')).join('\n\n')
+      : (paragraphs.find((paragraph) => paragraph.trim().startsWith('#')) ?? '');
+    return reply(chatId, `${value === 'caption' ? 'Yeni açıklamayı' : 'Yeni hashtagleri'} şimdi tek mesaj olarak yaz.\n\nMevcut metin:\n${currentValue}`);
   }
 }
 
@@ -121,7 +135,16 @@ async function processUpdates(timeout = 0) {
     if (message && String(message.chat.id) === allowedChatId && message.text?.trim()) {
       const text = message.text.trim();
       if (text === '/start') await reply(message.chat.id, 'Instagram içerik sistemi hazır. Bana konuyu yaz; sonra otomatik veya adım adım seç.');
-      else if (/^\/(aciklama|caption)\s+/i.test(text) || /^\/hashtag\s+/i.test(text)) {
+      else {
+        const pendingEdit = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && ['awaiting-caption-edit', 'awaiting-hashtag-edit'].includes(topic.status));
+        if (pendingEdit) {
+          const [topicId, topic] = pendingEdit;
+          const section = topic.status === 'awaiting-caption-edit' ? 'caption' : 'hashtags';
+          updateCaptionSection(topic, section, text);
+          topic.status = 'revision-requested';
+          await reply(message.chat.id, `${section === 'caption' ? 'Açıklama' : 'Hashtagler'} kaydedildi. Konu: ${topicId}. Güncel önizleme gönderime hazır.`);
+        }
+        else if (/^\/(aciklama|caption)\s+/i.test(text) || /^\/hashtag\s+/i.test(text)) {
         const isCaption = /^\/(aciklama|caption)\s+/i.test(text);
         const value = text.replace(isCaption ? /^\/(aciklama|caption)\s+/i : /^\/hashtag\s+/i, '');
         const latest = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && topic.captionPath);
@@ -132,11 +155,12 @@ async function processUpdates(timeout = 0) {
           topic.status = 'revision-requested';
           await reply(message.chat.id, `${isCaption ? 'Açıklama' : 'Hashtagler'} güncellendi. Konu: ${topicId}. Yeni önizleme gönderime hazır.`);
         }
-      }
-      else {
+        }
+        else {
         const id = String(update.update_id);
         state.topics[id] = { topic: text, receivedAt: new Date().toISOString(), chatId: message.chat.id, status: 'awaiting-mode' };
         await reply(message.chat.id, `Konu alındı:\n${text}\n\nNasıl ilerleyelim?`, [[{ text: 'Otomatik oluştur', callback_data: `auto:${id}` }], [{ text: 'Adım adım oluştur', callback_data: `guided:${id}` }]]);
+        }
       }
     }
     save();
