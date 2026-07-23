@@ -32,7 +32,8 @@ body.set('photo', new Blob([fs.readFileSync(file)]), path.basename(file));
 if (topicId) {
   body.set('reply_markup', JSON.stringify({ inline_keyboard: [
     [{ text: 'Instagram’da yayınla', callback_data: `review:publish-request:${topicId}` }],
-    [{ text: 'Düzeltme iste', callback_data: `review:revise:${topicId}` }]
+    [{ text: 'Düzeltme iste', callback_data: `review:revise:${topicId}` }],
+    [{ text: 'İptal', callback_data: `cancel:${topicId}` }]
   ] }));
 }
 const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body });

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { reportProgress } from './telegram-progress.mjs';
 
 const [topicId, customHeadline] = process.argv.slice(2);
 if (!topicId) throw new Error('Usage: build-caption.mjs <topic-id> [headline]');
@@ -74,4 +75,8 @@ history.entries = history.entries.filter((entry) => entry.topicId !== topicId);
 history.entries.push({ topicId, family, variant: variantIndex, generatedAt: new Date().toISOString() });
 history.entries = history.entries.slice(-50);
 fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
+await reportProgress(root, topicId, 95, 'Açıklama ve hashtag paketi hazırlanıyor.', [
+  'Farklı kanca ve CTA seçildi',
+  'Hashtag tekrarları kontrol edildi'
+]);
 console.log(path.join(packageDir, 'caption.txt'));

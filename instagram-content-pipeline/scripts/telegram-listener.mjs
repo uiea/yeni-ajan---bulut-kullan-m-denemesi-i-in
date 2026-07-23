@@ -45,11 +45,13 @@ const api = async (method, body) => {
   return data.result;
 };
 const reply = (chatId, text, keyboard) => api('sendMessage', { chat_id: chatId, text, reply_markup: keyboard ? { inline_keyboard: keyboard } : undefined });
-const chooseOverlay = (id) => [[{ text: 'Görsel üstü metin: evet', callback_data: `overlay:yes:${id}` }], [{ text: 'Görsel üstü metin: hayır', callback_data: `overlay:no:${id}` }]];
+const withCancel = (keyboard, id) => [...keyboard, [{ text: 'İptal', callback_data: `cancel:${id}` }]];
+const chooseOverlay = (id) => withCancel([[{ text: 'Görsel üstü metin: evet', callback_data: `overlay:yes:${id}` }], [{ text: 'Görsel üstü metin: hayır', callback_data: `overlay:no:${id}` }]], id);
 const chooseMediaSource = (id) => [
   [{ text: 'Lisanslı stok medya', callback_data: `source:stock:${id}` }],
   [{ text: 'Yapay zekâ ile oluştur', callback_data: `source:ai:${id}` }],
-  [{ text: 'Karma kullanım', callback_data: `source:mixed:${id}` }]
+  [{ text: 'Karma kullanım', callback_data: `source:mixed:${id}` }],
+  [{ text: 'İptal', callback_data: `cancel:${id}` }]
 ];
 const progressText = (percent, label) => {
   const completed = Math.round(percent / 10);
@@ -59,9 +61,9 @@ const updateProgress = async (topic, percent, label) => {
   topic.progress = { percent, label, updatedAt: new Date().toISOString() };
   const text = progressText(percent, label);
   if (topic.progressMessageId) {
-    await api('editMessageText', { chat_id: topic.chatId, message_id: topic.progressMessageId, text }).catch(() => {});
+    await api('editMessageText', { chat_id: topic.chatId, message_id: topic.progressMessageId, text, reply_markup: { inline_keyboard: [[{ text: 'İptal', callback_data: `cancel:${topic.id ?? ''}` }]] } }).catch(() => {});
   } else {
-    const message = await reply(topic.chatId, text);
+    const message = await reply(topic.chatId, text, [[{ text: 'İptal', callback_data: `cancel:${topic.id ?? ''}` }]]);
     topic.progressMessageId = message.message_id;
   }
 };
@@ -110,13 +112,42 @@ const startInstagramPublish = (topic) => {
   const publisherDir = path.resolve(root, '..', 'instagram-publisher');
   const image = path.relative(publisherDir, path.join(root, topic.previewFilePath));
   const caption = path.relative(publisherDir, path.join(root, topic.captionPath));
-  const child = spawn(process.execPath, ['publish.mjs', '--image', image, '--caption-file', caption, '--publish'], {
+  const resultPath = path.join(root, 'packages', `telegram-${topic.id ?? 'unknown'}`, `publish-result-${Date.now()}.json`);
+  const child = spawn(process.execPath, ['publish.mjs', '--image', image, '--caption-file', caption, '--result-file', resultPath, '--publish'], {
     cwd: publisherDir,
     detached: true,
     stdio: 'ignore',
     windowsHide: false
   });
   child.unref();
+  return resultPath;
+};
+const monitorPublishResult = (topic, resultPath) => {
+  let attempts = 0;
+  const timer = setInterval(async () => {
+    attempts += 1;
+    if (fs.existsSync(resultPath)) {
+      clearInterval(timer);
+      const result = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+      topic.publishResult = { ...result, resultPath: path.relative(root, resultPath) };
+      if (result.status === 'published') {
+        topic.status = 'published';
+        await reply(topic.chatId, 'Instagram yayını başarılı. Gönderi hesabında yayınlandı.');
+      } else if (result.status === 'failed') {
+        topic.status = 'publish-failed';
+        await reply(topic.chatId, `Instagram yayını başarısız.\nNeden: ${result.reason}\nÇözüm: ${result.solution}`);
+      } else {
+        topic.status = 'publish-verification-required';
+        await reply(topic.chatId, 'Paylaş komutu gönderildi ancak Instagram arayüzünde kesin başarı onayı algılanamadı. Profilini yenileyerek gönderiyi kontrol et. Görünmüyorsa işlemi tekrar başlat.');
+      }
+      save();
+    } else if (attempts >= 45) {
+      clearInterval(timer);
+      topic.status = 'publish-verification-required';
+      await reply(topic.chatId, 'Yayın sonucundan zamanında yanıt alınamadı. Tarayıcıdaki Instagram penceresini ve profilini kontrol et.');
+      save();
+    }
+  }, 2000);
 };
 
 async function handleCallback(callback) {
@@ -124,9 +155,16 @@ async function handleCallback(callback) {
   if (String(chatId) !== allowedChatId) return;
   await api('answerCallbackQuery', { callback_query_id: callback.id }).catch(() => {});
   const [action, value, id] = (callback.data ?? '').split(':');
-  const topicId = action === 'auto' || action === 'guided' ? value : id;
+  const topicId = action === 'auto' || action === 'guided' || action === 'cancel' ? value : id;
   const topic = state.topics[topicId];
   if (!topic) return reply(chatId, 'Bu seçim artık geçerli değil. Konuyu yeniden gönder.');
+  topic.id ??= topicId;
+
+  if (action === 'cancel') {
+    topic.status = 'cancelled';
+    topic.cancelledAt = new Date().toISOString();
+    return reply(chatId, 'Bu içerik çalışması iptal edildi. Dosyalar silinmedi. Yeni içerik için konu: ile başlayan mesaj gönderebilirsin.');
+  }
 
   if (action === 'auto') {
     const text = topic.topic.toLocaleLowerCase('tr-TR');
@@ -154,21 +192,21 @@ async function handleCallback(callback) {
     }
     topic.status = 'awaiting-format';
     await updateProgress(topic, 30, 'Kaynak seçildi. İçerik türü seçimi bekleniyor.');
-    return reply(chatId, '2/4 - Hangi formatı istiyorsun?', [
+    return reply(chatId, '2/4 - Hangi formatı istiyorsun?', withCancel([
       [{ text: 'Tek görsel', callback_data: `format:single-image:${topicId}` }, { text: 'Görsel + açıklama', callback_data: `format:single-image-caption:${topicId}` }],
       [{ text: 'Carousel', callback_data: `format:carousel:${topicId}` }, { text: 'Reel', callback_data: `format:reel:${topicId}` }]
-    ]);
+    ], topicId));
   }
   if (action === 'format') {
     topic.format = value;
     await updateProgress(topic, 45, 'İçerik biçimi kaydedildi. Görsel ayarları belirleniyor.');
     if (value === 'carousel') {
       topic.status = 'awaiting-slides';
-      return reply(chatId, '3/4 - Carousel kaç slayt olsun?', [[4, 6, 8, 10].map((n) => ({ text: `${n} slayt`, callback_data: `slides:${n}:${topicId}` }))]);
+      return reply(chatId, '3/4 - Carousel kaç slayt olsun?', withCancel([[4, 6, 8, 10].map((n) => ({ text: `${n} slayt`, callback_data: `slides:${n}:${topicId}` }))], topicId));
     }
     if (value === 'reel') {
       topic.status = 'awaiting-duration';
-      return reply(chatId, '3/4 - Reel süresi ne olsun?', [[8, 15, 30].map((n) => ({ text: `${n} sn`, callback_data: `duration:${n}:${topicId}` }))]);
+      return reply(chatId, '3/4 - Reel süresi ne olsun?', withCancel([[8, 15, 30].map((n) => ({ text: `${n} sn`, callback_data: `duration:${n}:${topicId}` }))], topicId));
     }
     topic.status = 'awaiting-overlay';
     return reply(chatId, '3/4 - Görselin üzerinde kısa metin olsun mu?', chooseOverlay(topicId));
@@ -223,9 +261,12 @@ async function handleCallback(callback) {
     }
     if (value === 'confirm') {
       try {
-        startInstagramPublish(topic);
+        topic.id = topicId;
+        const resultPath = startInstagramPublish(topic);
         topic.status = 'publish-started';
-        return reply(chatId, 'Instagram yayın işlemi başlatıldı. Tarayıcıdaki hesabın gönderiyi tamamlamasını bekle.');
+        topic.publishResultPath = path.relative(root, resultPath);
+        monitorPublishResult(topic, resultPath);
+        return reply(chatId, 'Instagram yayın işlemi başlatıldı. Sonuç başarı veya hata bilgisi olarak bu sohbete gönderilecek.');
       } catch (error) {
         topic.status = 'awaiting-publish-confirmation';
         return reply(chatId, `Yayın başlatılamadı: ${error.message}`);
@@ -271,9 +312,9 @@ async function processUpdates(timeout = 0) {
             await reply(message.chat.id, 'Yeni içerik başlatmak için mesajını şu biçimde gönder: \n\nkonu: yapay zekânın iş hayatına etkisi');
           } else {
             const id = String(update.update_id);
-            state.topics[id] = { topic: topicText, receivedAt: new Date().toISOString(), chatId: message.chat.id, status: 'awaiting-mode' };
+            state.topics[id] = { id, topic: topicText, receivedAt: new Date().toISOString(), chatId: message.chat.id, status: 'awaiting-mode' };
             await updateProgress(state.topics[id], 10, 'Konu alındı. İçerik tercihi bekleniyor.');
-            await reply(message.chat.id, `Konu alındı:\n${topicText}\n\nNasıl ilerleyelim?`, [[{ text: 'Otomatik oluştur', callback_data: `auto:${id}` }], [{ text: 'Adım adım oluştur', callback_data: `guided:${id}` }]]);
+            await reply(message.chat.id, `Konu alındı:\n${topicText}\n\nNasıl ilerleyelim?`, withCancel([[{ text: 'Otomatik oluştur', callback_data: `auto:${id}` }], [{ text: 'Adım adım oluştur', callback_data: `guided:${id}` }]], id));
           }
         }
       }

@@ -8,8 +8,20 @@ const value = (name) => args[args.indexOf(name) + 1];
 const image = value("--image");
 const captionFile = value("--caption-file");
 const caption = captionFile ? fs.readFileSync(captionFile, "utf8") : (value("--caption") ?? "");
+const resultFile = value("--result-file");
 const shouldPublish = args.includes("--publish");
 const shouldSaveDraft = args.includes("--save-draft");
+const reportResult = (status, details = {}) => {
+  if (!resultFile) return;
+  fs.writeFileSync(path.resolve(resultFile), JSON.stringify({ status, at: new Date().toISOString(), ...details }, null, 2));
+};
+const solutionFor = (error) => {
+  const message = error.message ?? String(error);
+  if (/login|giriş/i.test(message)) return 'Instagram oturumunu yeniden aç ve iki aşamalı doğrulamayı tamamla.';
+  if (/locator|timeout|input\[type="file"\]/i.test(message)) return 'Instagram arayüzü değişmiş veya yükleme penceresi hazır değil. Tarayıcıdaki ekranı kontrol edip işlemi tekrar dene.';
+  if (/network|net::/i.test(message)) return 'İnternet bağlantısını kontrol edip yeniden dene.';
+  return 'Tarayıcıdaki Instagram ekranını açık tut, hata ekranını kontrol et ve işlemi yeniden başlat.';
+};
 
 if (!image || !fs.existsSync(image)) {
   console.error("Kullanım: npm run publish -- --image <görsel-yolu> --caption <metin> [--publish]");
@@ -101,11 +113,19 @@ if (shouldSaveDraft) {
   // erişilebilir bir button/link rolü taşımıyor. Sabit penceredeki konumu kullan.
   await page.waitForTimeout(1000);
   await page.mouse.click(1108, 108);
-  console.log("Paylaş komutu gönderildi.");
-  await page.waitForTimeout(5000);
+  const publishedNotice = page.getByText(/your post has been shared|post shared|gönderin paylaşıldı|gönderi paylaşıldı/i);
+  try {
+    await publishedNotice.first().waitFor({ state: "visible", timeout: 30000 });
+    reportResult('published', { message: 'Instagram paylaşım onayı algılandı.' });
+    console.log("Instagram paylaşımı onaylandı.");
+  } catch {
+    reportResult('verification-required', { message: 'Paylaş komutu gönderildi ancak Instagram arayüzünde kesin paylaşım onayı algılanamadı.' });
+    console.log("Paylaş komutu gönderildi; Instagram onayı algılanamadı.");
+  }
   await browser.close();
 }
 } catch (error) {
+  reportResult('failed', { reason: error.message ?? String(error), solution: solutionFor(error) });
   console.error("Taslak hazırlanamadı. Tarayıcı açık bırakıldı; ekranı kapatmadan hata mesajını paylaşabilirsin.");
   console.error(error);
   await page.screenshot({ path: "hata-ekrani.png", fullPage: true }).catch(() => {});

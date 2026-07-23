@@ -1,5 +1,5 @@
 {
-  "offset": 753570456,
+  "offset": 753570467,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -60,7 +60,7 @@
       "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
       "receivedAt": "2026-07-23T21:50:16.807Z",
       "chatId": 8339222977,
-      "status": "awaiting-publish-confirmation",
+      "status": "publish-started",
       "progress": {
         "percent": 70,
         "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
@@ -75,6 +75,63 @@
       "previewFilePath": "packages\\telegram-753570449\\single-image-preview-v2.png",
       "captionPath": "packages\\telegram-753570449\\caption.txt",
       "headline": "Yapay Zekâ: Dönüşüm Şimdi Başlıyor"
+    },
+    "753570457": {
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T22:33:44.063Z",
+      "chatId": 8339222977,
+      "status": "brief-ready",
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "updatedAt": "2026-07-23T22:33:50.842Z"
+      },
+      "progressMessageId": 54,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock"
+    },
+    "753570460": {
+      "id": "753570460",
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T22:38:02.026Z",
+      "chatId": 8339222977,
+      "status": "cancelled",
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "updatedAt": "2026-07-23T22:38:08.379Z"
+      },
+      "progressMessageId": 59,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock",
+      "cancelledAt": "2026-07-23T22:38:40.677Z"
+    },
+    "753570464": {
+      "id": "753570464",
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T22:38:53.129Z",
+      "chatId": 8339222977,
+      "status": "brief-ready",
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "updatedAt": "2026-07-23T22:38:56.969Z"
+      },
+      "progressMessageId": 65,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock"
     }
   }
 }

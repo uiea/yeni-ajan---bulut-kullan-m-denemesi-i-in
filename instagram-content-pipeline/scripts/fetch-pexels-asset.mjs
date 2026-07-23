@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { reportProgress } from './telegram-progress.mjs';
 
 const [topicId] = process.argv.slice(2);
 if (!topicId) throw new Error('Usage: fetch-pexels-asset.mjs <topic-id>');
@@ -63,6 +64,11 @@ const recordQuota = (keys) => {
 
 const searchQuota = ensureQuota('search');
 const searchQuery = buildSearchQuery(topic.topic);
+await reportProgress(root, topicId, 75, 'Pexels’te uygun görsel aranıyor.', [
+  'Kaynak: Pexels',
+  `Arama terimi: ${searchQuery}`,
+  'Dikey format önceliklendiriliyor'
+]);
 const query = encodeURIComponent(searchQuery);
 const search = await fetch(`https://api.pexels.com/v1/search?query=${query}&orientation=portrait&size=large&per_page=${policy.sourceRotation.maxCandidatesPerSearch}`, {
   headers: { Authorization: env.PEXELS_API_KEY }
@@ -70,11 +76,19 @@ const search = await fetch(`https://api.pexels.com/v1/search?query=${query}&orie
 const payload = await search.json();
 if (!search.ok || !payload.photos?.length) throw new Error('Pexels uygun görsel döndürmedi.');
 recordQuota(searchQuota);
+await reportProgress(root, topicId, 80, 'Aday görseller filtreleniyor.', [
+  `${payload.photos.length} aday bulundu`,
+  'Metin, ekran, tabela ve logo riski metadata üzerinden eleniyor'
+]);
 
 const photo = chooseCandidate(payload.photos);
 if (!photo) throw new Error('Pexels adaylarının tamamı görsel metin/ekran riski nedeniyle elendi. Yeni arama terimi gerekir.');
 const imageUrl = photo.src.large2x ?? photo.src.large;
 const downloadQuota = ensureQuota('download');
+await reportProgress(root, topicId, 85, 'Seçilen görsel indiriliyor.', [
+  `Seçilen aday: Pexels #${photo.id}`,
+  'Kaynak bilgileri saklanacak'
+]);
 const assetResponse = await fetch(imageUrl);
 if (!assetResponse.ok) throw new Error('Seçilen Pexels görseli indirilemedi.');
 const contentType = assetResponse.headers.get('content-type') ?? 'image/jpeg';
@@ -84,6 +98,10 @@ fs.mkdirSync(packageDir, { recursive: true });
 const filePath = path.join(packageDir, `source-pexels-${photo.id}.${extension}`);
 fs.writeFileSync(filePath, Buffer.from(await assetResponse.arrayBuffer()));
 recordQuota(downloadQuota);
+await reportProgress(root, topicId, 90, 'Kaynak ve lisans kaydı oluşturuluyor.', [
+  `Fotoğrafçı: ${photo.photographer}`,
+  'Provenance kaydı hazırlanıyor'
+]);
 
 const provenance = {
   provider: 'Pexels',
@@ -113,4 +131,8 @@ fs.writeFileSync(transformationsPath, JSON.stringify({
 topic.status = 'asset-ready';
 topic.asset = { provider: 'pexels', filePath: provenance.localFile, provenancePath: path.relative(root, path.join(packageDir, 'provenance.json')), transformationsPath: path.relative(root, transformationsPath) };
 fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+await reportProgress(root, topicId, 92, 'Kaynak görsel hazır.', [
+  'Görsel uygunluk kontrolünden geçti',
+  'Başlık, açıklama ve hashtag paketi hazırlanacak'
+]);
 console.log(JSON.stringify({ topicId, filePath: provenance.localFile, provenance }, null, 2));
