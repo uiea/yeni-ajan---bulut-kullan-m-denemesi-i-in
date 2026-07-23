@@ -1,4 +1,13 @@
 {
-  "offset": 753570422,
-  "topics": {}
+  "offset": 753570428,
+  "topics": {
+    "753570422": {
+      "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T20:51:25.756Z",
+      "chatId": 8339222977,
+      "mode": "guided",
+      "format": "tek görsel + açıklama",
+      "status": "awaiting-format"
+    }
+  }
 }
