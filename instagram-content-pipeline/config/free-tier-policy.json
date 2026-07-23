@@ -1,0 +1,38 @@
+{
+  "mode": "free-first",
+  "sources": {
+    "pexels": {
+      "enabled": true,
+      "dailySearches": 12,
+      "dailyDownloads": 6,
+      "monthlySearches": 200,
+      "monthlyDownloads": 100,
+      "cacheHours": 168
+    },
+    "pixabay": {
+      "enabled": true,
+      "dailySearches": 8,
+      "dailyDownloads": 4,
+      "monthlySearches": 120,
+      "monthlyDownloads": 60,
+      "cacheHours": 168
+    },
+    "unsplash": {
+      "enabled": false,
+      "dailySearches": 4,
+      "dailyDownloads": 2,
+      "monthlySearches": 40,
+      "monthlyDownloads": 20,
+      "cacheHours": 168
+    }
+  },
+  "telegram": {
+    "maxTopicsPerDay": 5,
+    "allowedChatIdsRequired": true
+  },
+  "instagram": {
+    "maxPreparedPostsPerDay": 2,
+    "maxPublishedPostsPerDay": 1,
+    "humanReviewRequired": true
+  }
+}
