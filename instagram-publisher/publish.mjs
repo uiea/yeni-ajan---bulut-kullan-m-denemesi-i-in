@@ -96,7 +96,8 @@ if (shouldSaveDraft) {
   // Tarayıcı ve taslak ekranda açık kalsın; kullanıcı pencereyi kapattığında süreç biter.
   await keepBrowserOpen();
 } else {
-  const share = page.getByRole("button", { name: /share|paylaş/i });
+  const share = page.getByRole("button", { name: /share|paylaş|Paylaş/i })
+    .or(page.getByText(/^(share|paylaş|Paylaş)$/i));
   await share.waitFor({ state: "visible", timeout: 30000 });
   await share.click();
   console.log("Paylaş komutu gönderildi.");

@@ -1,6 +1,7 @@
 param(
   [string]$Caption = "Yapay zeka ile is akislarini otomatiklestirmenin 6 pratik yolu. Musteri mesajlarindan icerik planina, toplanti notlarindan satis onceliklerine kadar tekrar eden isleri daha hizli ve duzenli yonetmek mumkun. Kaydetmeyi unutma. #yapayzeka #otomasyon #verimlilik #isakisleri #ai #dijitalpazarlama",
-  [switch]$SaveDraft
+  [switch]$SaveDraft,
+  [switch]$Publish
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,4 +14,5 @@ $image = Join-Path $outputFolder.FullName "2026-07-21_instagram-carousel-ai-otom
 if (-not (Test-Path -LiteralPath $image)) { throw "Gorsel bulunamadi: $image" }
 $nodeArgs = @("publish.mjs", "--image", $image, "--caption", $Caption)
 if ($SaveDraft) { $nodeArgs += "--save-draft" }
+if ($Publish) { $nodeArgs += "--publish" }
 & node.exe @nodeArgs
