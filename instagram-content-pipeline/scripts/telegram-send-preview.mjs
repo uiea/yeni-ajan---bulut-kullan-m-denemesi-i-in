@@ -1,7 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const [file, caption = 'İçerik önizlemesi hazır. İncele, ardından düzeltme veya onay komutu ver.'] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const file = args[0];
+let caption = 'İçerik önizlemesi hazır. İncele, ardından düzeltme veya onay komutu ver.';
+let topicId;
+if (args[1] === '--caption-file') {
+  if (!args[2] || !fs.existsSync(args[2])) throw new Error('Caption dosyası bulunamadı.');
+  caption = fs.readFileSync(args[2], 'utf8');
+  topicId = args[3];
+} else {
+  caption = args[1] ?? caption;
+  topicId = args[2];
+}
 if (!file || !fs.existsSync(file)) throw new Error('Usage: telegram-send-preview.mjs <file> [caption]');
 const root = path.resolve(import.meta.dirname, '..');
 const env = {};
@@ -18,6 +29,12 @@ const body = new FormData();
 body.set('chat_id', env.TELEGRAM_ALLOWED_CHAT_ID);
 body.set('caption', caption.slice(0, 1024));
 body.set('photo', new Blob([fs.readFileSync(file)]), path.basename(file));
+if (topicId) {
+  body.set('reply_markup', JSON.stringify({ inline_keyboard: [
+    [{ text: 'Instagram için hazırla', callback_data: `review:ready:${topicId}` }],
+    [{ text: 'Düzeltme iste', callback_data: `review:revise:${topicId}` }]
+  ] }));
+}
 const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body });
 const result = await response.json();
 if (!result.ok) throw new Error('Telegram önizlemesi gönderilemedi.');

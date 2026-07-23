@@ -36,6 +36,20 @@ const api = async (method, body) => {
 };
 const reply = (chatId, text, keyboard) => api('sendMessage', { chat_id: chatId, text, reply_markup: keyboard ? { inline_keyboard: keyboard } : undefined });
 const chooseOverlay = (id) => [[{ text: 'Görsel üstü metin: evet', callback_data: `overlay:yes:${id}` }], [{ text: 'Görsel üstü metin: hayır', callback_data: `overlay:no:${id}` }]];
+const updateCaptionSection = (topic, section, value) => {
+  if (!topic.captionPath) throw new Error('Bu konu için henüz açıklama paketi oluşturulmadı.');
+  const captionPath = path.join(root, topic.captionPath);
+  const current = fs.readFileSync(captionPath, 'utf8');
+  const paragraphs = current.split(/\r?\n\r?\n/);
+  const hashtagIndex = paragraphs.findIndex((paragraph) => paragraph.trim().startsWith('#'));
+  if (section === 'caption') {
+    const hashtags = hashtagIndex >= 0 ? paragraphs[hashtagIndex] : '';
+    fs.writeFileSync(captionPath, `${value.trim()}\n\n${hashtags.trim()}\n`, 'utf8');
+  } else {
+    const copy = hashtagIndex >= 0 ? paragraphs.slice(0, hashtagIndex).join('\n\n') : current.trim();
+    fs.writeFileSync(captionPath, `${copy}\n\n${value.trim()}\n`, 'utf8');
+  }
+};
 
 async function handleCallback(callback) {
   const chatId = callback.message?.chat?.id;
@@ -83,6 +97,19 @@ async function handleCallback(callback) {
     enqueuePreview(topicId);
     return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
   }
+  if (action === 'review') {
+    if (value === 'ready') {
+      topic.status = 'instagram-ready';
+      return reply(chatId, 'Taslak onaylandı ve Instagram için hazır durumuna alındı. Paylaşım yapılmadı; yayınlama öncesinde ayrıca onayın istenecek.');
+    }
+    if (value === 'revise') {
+      topic.status = 'revision-requested';
+      const currentCaption = topic.captionPath && fs.existsSync(path.join(root, topic.captionPath))
+        ? fs.readFileSync(path.join(root, topic.captionPath), 'utf8').trim()
+        : 'Açıklama paketi henüz oluşturulmadı.';
+      return reply(chatId, `Düzeltme isteğin kaydedildi.\n\nMevcut açıklama ve hashtag'ler:\n\n${currentCaption}\n\nDeğiştirmek için metni kopyalayıp düzenle, sonra:\n/aciklama yeni açıklamanın tamamı\n/hashtag #etiket1 #etiket2\n\nkomutlarından uygun olanıyla gönder.`);
+    }
+  }
 }
 
 async function processUpdates(timeout = 0) {
@@ -94,6 +121,18 @@ async function processUpdates(timeout = 0) {
     if (message && String(message.chat.id) === allowedChatId && message.text?.trim()) {
       const text = message.text.trim();
       if (text === '/start') await reply(message.chat.id, 'Instagram içerik sistemi hazır. Bana konuyu yaz; sonra otomatik veya adım adım seç.');
+      else if (/^\/(aciklama|caption)\s+/i.test(text) || /^\/hashtag\s+/i.test(text)) {
+        const isCaption = /^\/(aciklama|caption)\s+/i.test(text);
+        const value = text.replace(isCaption ? /^\/(aciklama|caption)\s+/i : /^\/hashtag\s+/i, '');
+        const latest = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && topic.captionPath);
+        if (!latest) await reply(message.chat.id, 'Düzenlenecek bir açıklama paketi bulunamadı.');
+        else {
+          const [topicId, topic] = latest;
+          updateCaptionSection(topic, isCaption ? 'caption' : 'hashtags', value);
+          topic.status = 'revision-requested';
+          await reply(message.chat.id, `${isCaption ? 'Açıklama' : 'Hashtagler'} güncellendi. Konu: ${topicId}. Yeni önizleme gönderime hazır.`);
+        }
+      }
       else {
         const id = String(update.update_id);
         state.topics[id] = { topic: text, receivedAt: new Date().toISOString(), chatId: message.chat.id, status: 'awaiting-mode' };

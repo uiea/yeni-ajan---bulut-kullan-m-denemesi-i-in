@@ -1,5 +1,5 @@
 {
-  "offset": 753570431,
+  "offset": 753570436,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -7,8 +7,10 @@
       "chatId": 8339222977,
       "mode": "guided",
       "format": "single",
-      "status": "brief-ready",
-      "textOnVisual": true
+      "status": "revision-requested",
+      "textOnVisual": true,
+      "headline": "Yapay Zekâ: Yeni Dünyanın Gücü",
+      "captionPath": "packages\\telegram-753570422\\caption.txt"
     }
   }
 }
