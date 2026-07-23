@@ -38,7 +38,16 @@ await page.waitForTimeout(3000);
 const create = page.getByRole("link", { name: /create|oluştur/i }).or(page.getByRole("button", { name: /create|oluştur/i }));
 await create.first().waitFor({ state: "visible", timeout: 60000 });
 await create.first().click();
-const chooseFromComputer = page.getByRole("button", { name: /select from computer|bilgisayardan seç/i });
+await page.waitForTimeout(500);
+
+// Bazı Instagram arayüzlerinde Oluştur ilk olarak tür seçimi (Post/Reel/Story) açar.
+const postChoice = page.getByText(/^(post|gönderi)$/i);
+if (await postChoice.count()) {
+  await postChoice.first().click();
+  await page.waitForTimeout(500);
+}
+
+const chooseFromComputer = page.getByText(/select from computer|bilgisayardan seç/i);
 if (await chooseFromComputer.count()) {
   await chooseFromComputer.first().click();
 }
