@@ -54,6 +54,20 @@ const chooseMediaSource = (id) => [
   [{ text: 'Karma kullanım', callback_data: `source:mixed:${id}` }],
   [{ text: 'İptal', callback_data: `cancel:${id}` }]
 ];
+const audioCatalogPath = path.join(root, 'library', 'music', 'catalog.json');
+const chooseAudioCandidate = (topic) => {
+  const catalog = fs.existsSync(audioCatalogPath) ? JSON.parse(fs.readFileSync(audioCatalogPath, 'utf8')) : { tracks: [] };
+  const rejected = new Set(topic.rejectedTrackIds ?? []);
+  return catalog.tracks.find((track) => !rejected.has(track.id));
+};
+const sendMusicCandidate = async (topic, topicId, track) => {
+  const script = path.join(root, 'scripts', 'telegram-send-music-candidate.mjs');
+  await new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [script, topicId, track.id], { cwd: root, windowsHide: true });
+    child.on('error', reject);
+    child.on('close', (code) => code === 0 ? resolve() : reject(new Error('Ses önizlemesi gönderilemedi.')));
+  });
+};
 const recordActivity = (topic, percent, label, steps = []) => {
   topic.activity = [...(topic.activity ?? []), { at: new Date().toISOString(), percent, label, steps }].slice(-8);
 };
@@ -246,6 +260,17 @@ async function handleCallback(callback) {
   }
   if (action === 'asset') {
     if (value === 'approve') {
+      if (topic.format === 'reel') {
+        const track = chooseAudioCandidate(topic);
+        if (!track) {
+          topic.status = 'awaiting-music-library';
+          return reply(chatId, 'Reel için onaylı ses kütüphanesi henüz boş. Pixabay’den bir MP3 indirip kütüphaneye ekledikten sonra ses önizlemesi gönderilecek.');
+        }
+        topic.audioCandidate = { trackId: track.id, title: track.title, filePath: track.filePath };
+        topic.status = 'awaiting-audio-approval';
+        await sendMusicCandidate(topic, topicId, track);
+        return;
+      }
       topic.status = 'brief-ready';
       enqueuePreview(topicId, 'render');
       await updateProgress(topic, 88, 'Görsel onaylandı. Metin ve paylaşım önizlemesi hazırlanıyor.');
@@ -259,6 +284,29 @@ async function handleCallback(callback) {
       enqueuePreview(topicId, 'candidate');
       await updateProgress(topic, 72, 'Görsel reddedildi. Farklı aday aranıyor.');
       return reply(chatId, 'Bu görsel kullanılmayacak. Yeni aday aranıyor.');
+    }
+  }
+  if (action === 'music') {
+    if (value === 'approve') {
+      topic.audio = topic.audioCandidate;
+      topic.status = 'brief-ready';
+      enqueuePreview(topicId, 'render');
+      await updateProgress(topic, 88, 'Ses onaylandı. Sesli Reel hazırlanıyor.');
+      return reply(chatId, 'Ses onaylandı. Reel önizlemesi hazırlanacak.');
+    }
+    if (value === 'next') {
+      topic.rejectedTrackIds = [...new Set([...(topic.rejectedTrackIds ?? []), topic.audioCandidate?.trackId].filter(Boolean))];
+      const nextTrack = chooseAudioCandidate(topic);
+      if (!nextTrack) { topic.status = 'awaiting-music-library'; return reply(chatId, 'Kütüphanede başka onaylı ses kalmadı. Pixabay’den yeni bir parça ekleyebilirsin.'); }
+      topic.audioCandidate = { trackId: nextTrack.id, title: nextTrack.title, filePath: nextTrack.filePath };
+      await sendMusicCandidate(topic, topicId, nextTrack);
+      return;
+    }
+    if (value === 'silent') {
+      topic.audio = null;
+      topic.status = 'brief-ready';
+      enqueuePreview(topicId, 'render');
+      return reply(chatId, 'Sessiz Reel seçildi. Önizleme hazırlanacak.');
     }
   }
   if (action === 'review') {

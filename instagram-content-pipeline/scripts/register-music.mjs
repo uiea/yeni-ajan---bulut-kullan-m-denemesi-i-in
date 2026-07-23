@@ -1,0 +1,28 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+
+const args = process.argv.slice(2);
+const value = (flag) => { const index = args.indexOf(flag); return index >= 0 ? args[index + 1] : undefined; };
+const file = value('--file');
+const title = value('--title');
+const sourceUrl = value('--source-url');
+const license = value('--license');
+const creator = value('--creator') ?? '';
+const attribution = value('--attribution') ?? '';
+if (!file || !title || !sourceUrl || !license) throw new Error('Usage: register-music.mjs --file <mp3> --title <ad> --source-url <url> --license <lisans> [--creator <ad>] [--attribution <metin>]');
+if (!fs.existsSync(file)) throw new Error('Ses dosyası bulunamadı.');
+const root = path.resolve(import.meta.dirname, '..');
+const approvedDir = path.join(root, 'library', 'music', 'approved');
+const extension = path.extname(file).toLowerCase();
+if (!['.mp3', '.wav', '.m4a', '.aac'].includes(extension)) throw new Error('Desteklenmeyen ses biçimi. MP3, WAV, M4A veya AAC kullan.');
+fs.mkdirSync(approvedDir, { recursive: true });
+const id = crypto.createHash('sha256').update(`${title}:${sourceUrl}`).digest('hex').slice(0, 12);
+const destination = path.join(approvedDir, `${id}${extension}`);
+fs.copyFileSync(file, destination);
+const catalogPath = path.join(root, 'library', 'music', 'catalog.json');
+const catalog = fs.existsSync(catalogPath) ? JSON.parse(fs.readFileSync(catalogPath, 'utf8')) : { tracks: [] };
+catalog.tracks = catalog.tracks.filter((track) => track.id !== id);
+catalog.tracks.push({ id, title, creator, source: 'Pixabay Music', sourceUrl, license, attribution, filePath: path.relative(root, destination), addedAt: new Date().toISOString(), sha256: crypto.createHash('sha256').update(fs.readFileSync(destination)).digest('hex') });
+fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2));
+console.log(`Ses kütüphaneye eklendi: ${id}`);

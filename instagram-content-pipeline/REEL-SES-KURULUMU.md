@@ -1,6 +1,8 @@
 # Reel ses akışı
 
-Reel üretiminde ses, görsel gibi ayrı bir onay adımıdır. Sistem önce telifsiz ses adayını Telegram'a gönderir; **Bu sesi kullan**, **Başka ses ara** ve **Sessiz Reel** seçeneklerinden biri seçilmeden MP4 render edilmez.
+Reel üretiminde ses, görsel gibi ayrı bir onay adımıdır. Varsayılan yöntem **bağlantı-öncelikli**dir: sistem Telegram'da Pixabay parça sayfası bağlantısını verir; parça tarayıcıda dinlenir. **Bu sesi kullan**, **Başka ses ara** ve **Sessiz Reel** seçeneklerinden biri seçilmeden MP4 render edilmez.
+
+Telegram ses mesajı, yalnızca daha önce onaylanıp yerel kütüphaneye eklenen parçalar için kullanılır. Yeni adaylarda onaydan önce MP3 indirilmez.
 
 ## Kaynak sırası
 
@@ -14,6 +16,18 @@ Instagram'ın uygulama içindeki ticari/trend sesleri dışarı indirilmez ve do
 - `.env.local` içinde `PIXABAY_API_KEY`.
 - Video render için bilgisayarda FFmpeg.
 - Her ses dosyası için `audio-provenance.json`: kaynak, eser adı, sanatçı, lisans, URL, indirme zamanı, atıf gereksinimi.
+
+## İlk parça ekleme
+
+1. Pixabay Music'te bir parçayı dinle ve lisans sayfasını kontrol et.
+2. Parçayı seçtikten sonra Pixabay'in kendi indirme düğmesiyle indir.
+3. Parçayı kayda almak için şu komutu çalıştır:
+
+```powershell
+node scripts/register-music.mjs --file "C:\Indirilenler\parca.mp3" --title "Parça adı" --source-url "Pixabay parça URL'si" --license "Pixabay Content License" --creator "Sanatçı adı"
+```
+
+Bu işlem lisans kaydını `library/music/catalog.json` içine ekler. Yalnızca onaylanan parçalar saklanır; aynı parça sonraki Reellerde yeniden kullanılabilir. Sonrasında `render-reel.mjs` görsel ve onaylı sesi 1080×1920 MP4 Reel'e dönüştürür.
 
 ## Yeniden kullanım
 
