@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { quotaText, quotaGuidance } from './quota-utils.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const env = {};
@@ -331,6 +332,7 @@ async function processUpdates(timeout = 0) {
       if (message && String(message.chat.id) === allowedChatId && message.text?.trim()) {
         const text = message.text.trim();
         if (text === '/start' || text === '/durum') await showStatus(message.chat.id);
+        else if (text === '/kota') await reply(message.chat.id, `Medya kotası\n\n${quotaText(root)}\n\nAlternatif yol\n${quotaGuidance(root)}\n\nBu değerler sistemin güvenli çalışma limitleridir. Limit dolarsa yeni arama/indirme başlatılmaz; günlük limit İstanbul saatine göre gece sıfırlanır.`);
       else {
         const pendingEdit = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && ['awaiting-caption-edit', 'awaiting-hashtag-edit'].includes(topic.status));
         if (pendingEdit) {
