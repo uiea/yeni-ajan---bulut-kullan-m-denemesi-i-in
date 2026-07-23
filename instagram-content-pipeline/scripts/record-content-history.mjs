@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+
+const [topicId] = process.argv.slice(2);
+if (!topicId) throw new Error('Usage: record-content-history.mjs <topic-id>');
+const root = path.resolve(import.meta.dirname, '..');
+const packageDir = path.join(root, 'packages', `telegram-${topicId}`);
+const state = JSON.parse(fs.readFileSync(path.join(root, 'data', 'telegram-state.json'), 'utf8'));
+const topic = state.topics[topicId];
+if (!topic) throw new Error('Konu bulunamadı.');
+const provenance = JSON.parse(fs.readFileSync(path.join(packageDir, 'provenance.json'), 'utf8'));
+const caption = fs.readFileSync(path.join(root, topic.captionPath), 'utf8').trim();
+const historyPath = path.join(root, 'data', 'content-history.json');
+const history = fs.existsSync(historyPath) ? JSON.parse(fs.readFileSync(historyPath, 'utf8')) : { entries: [] };
+const assetId = String(provenance.assetId ?? provenance.sourceUrl?.match(/-(\d+)\/?$/)?.[1] ?? '');
+history.entries = history.entries.filter((entry) => entry.topicId !== topicId);
+history.entries.push({ topicId, createdAt: new Date().toISOString(), family: /yapay zek|artificial intelligence|\bai\b/i.test(topic.topic) ? 'ai' : 'generic', source: { provider: provenance.provider, assetId, sourceUrl: provenance.sourceUrl }, headline: topic.headline, copyVariant: topic.copyVariant, copySignature: topic.copySignature, captionHash: crypto.createHash('sha256').update(caption).digest('hex'), hashtags: (caption.match(/#[\p{L}\p{N}_]+/gu) ?? []), cta: caption.split(/\r?\n\r?\n/).at(-2) ?? '' });
+history.entries = history.entries.slice(-500);
+fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));

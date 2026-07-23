@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const [topicId] = process.argv.slice(2);
+if (!topicId) throw new Error('Usage: requeue-preview.mjs <topic-id>');
+const root = path.resolve(import.meta.dirname, '..');
+const statePath = path.join(root, 'data', 'telegram-state.json');
+const queuePath = path.join(root, 'data', 'preview-queue.json');
+const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+const topic = state.topics[topicId];
+if (!topic) throw new Error('Konu bulunamadı.');
+if (!topic.mediaSource) topic.mediaSource = 'stock';
+topic.status = 'brief-ready';
+topic.requeuedAt = new Date().toISOString();
+topic.asset = undefined;
+topic.previewFilePath = undefined;
+fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+const queue = fs.existsSync(queuePath) ? JSON.parse(fs.readFileSync(queuePath, 'utf8')) : { jobs: [] };
+queue.jobs.push({ topicId, status: 'queued', queuedAt: new Date().toISOString(), reason: 'user-requested-unique-regeneration' });
+fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2));
+console.log(`Konu ${topicId} yeniden önizleme kuyruğuna eklendi.`);

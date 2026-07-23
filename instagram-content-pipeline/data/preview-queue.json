@@ -16,43 +16,49 @@
     },
     {
       "topicId": "753570447",
-      "status": "queued",
-      "queuedAt": "2026-07-23T21:44:50.605Z"
+      "status": "archived",
+      "queuedAt": "2026-07-23T21:44:50.605Z",
+      "archivedReason": "Yeni sürekli işçi öncesi eski deneme"
     },
     {
       "topicId": "753570449",
-      "status": "queued",
-      "queuedAt": "2026-07-23T21:51:59.151Z"
+      "status": "archived",
+      "queuedAt": "2026-07-23T21:51:59.151Z",
+      "archivedReason": "Yayın doğrulaması bekleyen önceki deneme"
     },
     {
       "topicId": "753570457",
-      "status": "queued",
-      "queuedAt": "2026-07-23T22:33:50.840Z"
+      "status": "archived",
+      "queuedAt": "2026-07-23T22:33:50.840Z",
+      "archivedReason": "Yeni sürekli işçi öncesi eski deneme"
     },
     {
       "topicId": "753570460",
-      "status": "queued",
+      "status": "cancelled",
       "queuedAt": "2026-07-23T22:38:08.377Z"
     },
     {
       "topicId": "753570464",
-      "status": "queued",
+      "status": "cancelled",
       "queuedAt": "2026-07-23T22:38:56.969Z"
     },
     {
       "topicId": "753570468",
-      "status": "queued",
+      "status": "cancelled",
       "queuedAt": "2026-07-23T22:40:55.823Z"
     },
     {
       "topicId": "753570472",
-      "status": "queued",
+      "status": "cancelled",
       "queuedAt": "2026-07-23T22:46:29.038Z"
     },
     {
       "topicId": "753570476",
-      "status": "queued",
-      "queuedAt": "2026-07-23T22:48:50.362Z"
+      "status": "sent",
+      "queuedAt": "2026-07-23T22:48:50.362Z",
+      "startedAt": "2026-07-23T22:51:53.093Z",
+      "completedAt": "2026-07-23T22:52:01.569Z",
+      "previewFile": "packages\\telegram-753570476\\single-image-preview-1784847116251.png"
     }
   ]
 }

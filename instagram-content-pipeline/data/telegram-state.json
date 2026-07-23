@@ -1,5 +1,5 @@
 {
-  "offset": 753570479,
+  "offset": 753570480,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -204,7 +204,7 @@
       "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
       "receivedAt": "2026-07-23T22:48:44.706Z",
       "chatId": 8339222977,
-      "status": "brief-ready",
+      "status": "cancelled",
       "activity": [
         {
           "at": "2026-07-23T22:48:44.706Z",
@@ -240,7 +240,18 @@
       "textOnVisual": true,
       "slides": null,
       "durationSeconds": null,
-      "mediaSource": "stock"
+      "mediaSource": "stock",
+      "asset": {
+        "provider": "pexels",
+        "filePath": "packages\\telegram-753570476\\source-pexels-19945132.jpg",
+        "provenancePath": "packages\\telegram-753570476\\provenance.json",
+        "transformationsPath": "packages\\telegram-753570476\\transformations.json"
+      },
+      "headline": "Yapay Zekâ: Yeni Dünyanın Gücü",
+      "copyVariant": 0,
+      "captionPath": "packages\\telegram-753570476\\caption.txt",
+      "previewFilePath": "packages\\telegram-753570476\\single-image-preview-1784847116251.png",
+      "cancelledAt": "2026-07-23T22:56:44.466Z"
     }
   }
 }

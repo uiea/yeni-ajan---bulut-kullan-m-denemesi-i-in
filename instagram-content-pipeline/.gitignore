@@ -2,5 +2,6 @@
 data/telegram-state.json
 data/preview-queue.json
 data/copy-history.json
+data/content-history.json
 library/asset-index.json
 packages/

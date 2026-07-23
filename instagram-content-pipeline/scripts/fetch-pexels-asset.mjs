@@ -35,13 +35,19 @@ const buildSearchQuery = (text) => {
   return text;
 };
 const unwantedVisualTextTerms = /\b(text|code|coding|programming|screen|monitor|sign|signage|logo|letter|word|keyboard|terminal)\b/i;
+const policy = JSON.parse(fs.readFileSync(path.join(root, 'config', 'free-tier-policy.json'), 'utf8'));
+const uniqueness = JSON.parse(fs.readFileSync(path.join(root, 'config', 'content-uniqueness-policy.json'), 'utf8'));
+const historyPath = path.join(root, 'data', 'content-history.json');
+const history = fs.existsSync(historyPath) ? JSON.parse(fs.readFileSync(historyPath, 'utf8')) : { entries: [] };
+const usedSourceIds = new Set(history.entries.map((entry) => String(entry.source?.assetId ?? '')).filter(Boolean));
 const chooseCandidate = (photos) => {
-  const filtered = photos.filter((photo) => !unwantedVisualTextTerms.test(`${photo.alt ?? ''} ${photo.url ?? ''}`));
+  const filtered = photos
+    .filter((photo) => !unwantedVisualTextTerms.test(`${photo.alt ?? ''} ${photo.url ?? ''}`))
+    .filter((photo) => !uniqueness.avoidUsedSourceAssets || !usedSourceIds.has(String(photo.id)));
   const portrait = filtered.filter((photo) => photo.height >= photo.width);
   return (portrait[0] ?? filtered[0] ?? null);
 };
 
-const policy = JSON.parse(fs.readFileSync(path.join(root, 'config', 'free-tier-policy.json'), 'utf8'));
 const usagePath = path.join(root, 'data', 'usage.json');
 const usage = fs.existsSync(usagePath) ? JSON.parse(fs.readFileSync(usagePath, 'utf8')) : {};
 const today = new Date().toISOString().slice(0, 10);
@@ -82,7 +88,7 @@ await reportProgress(root, topicId, 80, 'Aday görseller filtreleniyor.', [
 ], 65, 'Aday filtreleme');
 
 const photo = chooseCandidate(payload.photos);
-if (!photo) throw new Error('Pexels adaylarının tamamı görsel metin/ekran riski nedeniyle elendi. Yeni arama terimi gerekir.');
+if (!photo) throw new Error('Pexels adaylarının tamamı daha önce kullanılmış veya görsel risk taşıyor. Yeni arama terimi gerekir.');
 const imageUrl = photo.src.large2x ?? photo.src.large;
 const downloadQuota = ensureQuota('download');
 await reportProgress(root, topicId, 85, 'Seçilen görsel indiriliyor.', [
@@ -105,6 +111,7 @@ await reportProgress(root, topicId, 90, 'Kaynak ve lisans kaydı oluşturuluyor.
 
 const provenance = {
   provider: 'Pexels',
+  assetId: String(photo.id),
   sourceUrl: photo.url,
   creator: photo.photographer,
   creatorUrl: photo.photographer_url,
@@ -115,6 +122,7 @@ const provenance = {
   candidateReview: {
     candidatesReturned: payload.photos.length,
     candidatesRejectedForMetadataRisk: payload.photos.filter((item) => unwantedVisualTextTerms.test(`${item.alt ?? ''} ${item.url ?? ''}`)).map((item) => item.id),
+    candidatesRejectedForReuse: payload.photos.filter((item) => usedSourceIds.has(String(item.id))).map((item) => item.id),
     selectedCandidateId: photo.id,
     rule: 'Prefer portrait candidates without metadata indicators of visible text, code, screens, signs, or logos.'
   },

@@ -1,0 +1,7 @@
+{
+  "retainDays": 365,
+  "avoidUsedSourceAssets": true,
+  "avoidRepeatedCopyVariants": true,
+  "avoidRepeatedCaptionText": true,
+  "fallback": "use-next-unused-candidate-or-request-new-search-query"
+}
