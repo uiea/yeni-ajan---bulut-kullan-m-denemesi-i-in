@@ -110,12 +110,33 @@ const showStatus = async (chatId) => {
   const activity = (topic.activity ?? []).map((entry) => `• %${entry.percent} — ${entry.label}`).join('\n');
   return reply(chatId, `Çalışma durumu\nKonu: ${topic.topic}\nKimlik: ${topicId}\nAşama: ${topic.status}${progress}${activity ? `\n\nMevcut durum:\n${activity}` : ''}\n\n${resumeInstruction(topic)}`);
 };
-const startInstagramPublish = (topic) => {
-  if (!topic.previewFilePath || !topic.captionPath) throw new Error('Yayın için görsel veya açıklama paketi eksik.');
+const resolvePublishPackage = (topic, topicId) => {
+  const packageDir = path.join(root, 'packages', `telegram-${topicId}`);
+  const existing = (candidate) => candidate && fs.existsSync(path.resolve(root, candidate));
+  if (!existing(topic.captionPath)) {
+    const fallbackCaption = path.join(packageDir, 'caption.txt');
+    if (fs.existsSync(fallbackCaption)) topic.captionPath = path.relative(root, fallbackCaption);
+  }
+  if (!existing(topic.previewFilePath) && fs.existsSync(packageDir)) {
+    const previews = fs.readdirSync(packageDir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && /^single-image-preview.*\.(png|jpe?g)$/i.test(entry.name))
+      .map((entry) => path.join(packageDir, entry.name))
+      .sort((left, right) => fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs);
+    if (previews[0]) topic.previewFilePath = path.relative(root, previews[0]);
+  }
+  if (!existing(topic.previewFilePath) && existing(topic.asset?.filePath)) topic.previewFilePath = topic.asset.filePath;
+  const missing = [];
+  if (!existing(topic.previewFilePath)) missing.push('görsel önizlemesi');
+  if (!existing(topic.captionPath)) missing.push('açıklama paketi');
+  return { ok: missing.length === 0, missing };
+};
+const startInstagramPublish = (topic, topicId) => {
+  const packageCheck = resolvePublishPackage(topic, topicId);
+  if (!packageCheck.ok) throw new Error(`Yayın paketi eksik: ${packageCheck.missing.join(', ')}. Önizlemeyi yeniden oluştur düğmesiyle ilgili adıma dön.`);
   const publisherDir = path.resolve(root, '..', 'instagram-publisher');
   const image = path.relative(publisherDir, path.join(root, topic.previewFilePath));
   const caption = path.relative(publisherDir, path.join(root, topic.captionPath));
-  const resultPath = path.join(root, 'packages', `telegram-${topic.id ?? 'unknown'}`, `publish-result-${Date.now()}.json`);
+  const resultPath = path.join(root, 'packages', `telegram-${topicId}`, `publish-result-${Date.now()}.json`);
   const child = spawn(process.execPath, ['publish.mjs', '--image', image, '--caption-file', caption, '--result-file', resultPath, '--publish'], {
     cwd: publisherDir,
     detached: true,
@@ -224,6 +245,11 @@ async function handleCallback(callback) {
   }
   if (action === 'review') {
     if (value === 'publish-request') {
+      const packageCheck = resolvePublishPackage(topic, topicId);
+      if (!packageCheck.ok) {
+        topic.status = 'awaiting-review';
+        return reply(chatId, `Yayın paketi henüz tamam değil: ${packageCheck.missing.join(', ')}. Önizleme yeniden hazırlanmalı; yayın onayı gösterilmedi.`);
+      }
       topic.status = 'awaiting-publish-confirmation';
       const image = topic.previewFilePath ?? topic.asset?.filePath ?? 'önizleme görseli';
       return reply(chatId, `Yayın onayı gerekli.\n\nGörsel: ${image}\nAçıklama: ${topic.captionPath ?? 'açıklama paketi'}\nHedef: Bu bilgisayardaki yayıncı profilinde giriş yapılmış Instagram hesabı\n\nBu gönderi herkese açık olarak yayınlanacak.`, [
@@ -265,7 +291,7 @@ async function handleCallback(callback) {
     if (value === 'confirm') {
       try {
         topic.id = topicId;
-        const resultPath = startInstagramPublish(topic);
+        const resultPath = startInstagramPublish(topic, topicId);
         topic.status = 'publish-started';
         topic.publishResultPath = path.relative(root, resultPath);
         monitorPublishResult(topic, resultPath);

@@ -59,6 +59,15 @@
       "startedAt": "2026-07-23T22:51:53.093Z",
       "completedAt": "2026-07-23T22:52:01.569Z",
       "previewFile": "packages\\telegram-753570476\\single-image-preview-1784847116251.png"
+    },
+    {
+      "topicId": "753570476",
+      "status": "sent",
+      "queuedAt": "2026-07-23T23:00:47.960Z",
+      "reason": "user-requested-unique-regeneration",
+      "startedAt": "2026-07-23T23:00:48.946Z",
+      "completedAt": "2026-07-23T23:01:01.091Z",
+      "previewFile": "packages\\telegram-753570476\\single-image-preview-1784847654065.png"
     }
   ]
 }
