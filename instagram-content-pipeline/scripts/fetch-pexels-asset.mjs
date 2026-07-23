@@ -68,7 +68,7 @@ await reportProgress(root, topicId, 75, 'Pexels’te uygun görsel aranıyor.', 
   'Kaynak: Pexels',
   `Arama terimi: ${searchQuery}`,
   'Dikey format önceliklendiriliyor'
-]);
+], 20, 'Pexels araması');
 const query = encodeURIComponent(searchQuery);
 const search = await fetch(`https://api.pexels.com/v1/search?query=${query}&orientation=portrait&size=large&per_page=${policy.sourceRotation.maxCandidatesPerSearch}`, {
   headers: { Authorization: env.PEXELS_API_KEY }
@@ -79,7 +79,7 @@ recordQuota(searchQuota);
 await reportProgress(root, topicId, 80, 'Aday görseller filtreleniyor.', [
   `${payload.photos.length} aday bulundu`,
   'Metin, ekran, tabela ve logo riski metadata üzerinden eleniyor'
-]);
+], 65, 'Aday filtreleme');
 
 const photo = chooseCandidate(payload.photos);
 if (!photo) throw new Error('Pexels adaylarının tamamı görsel metin/ekran riski nedeniyle elendi. Yeni arama terimi gerekir.');
@@ -88,7 +88,7 @@ const downloadQuota = ensureQuota('download');
 await reportProgress(root, topicId, 85, 'Seçilen görsel indiriliyor.', [
   `Seçilen aday: Pexels #${photo.id}`,
   'Kaynak bilgileri saklanacak'
-]);
+], 25, 'Görsel indirme');
 const assetResponse = await fetch(imageUrl);
 if (!assetResponse.ok) throw new Error('Seçilen Pexels görseli indirilemedi.');
 const contentType = assetResponse.headers.get('content-type') ?? 'image/jpeg';
@@ -101,7 +101,7 @@ recordQuota(downloadQuota);
 await reportProgress(root, topicId, 90, 'Kaynak ve lisans kaydı oluşturuluyor.', [
   `Fotoğrafçı: ${photo.photographer}`,
   'Provenance kaydı hazırlanıyor'
-]);
+], 70, 'Provenance kaydı');
 
 const provenance = {
   provider: 'Pexels',
@@ -134,5 +134,5 @@ fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 await reportProgress(root, topicId, 92, 'Kaynak görsel hazır.', [
   'Görsel uygunluk kontrolünden geçti',
   'Başlık, açıklama ve hashtag paketi hazırlanacak'
-]);
+], 100, 'Kaynak görsel kontrolü');
 console.log(JSON.stringify({ topicId, filePath: provenance.localFile, provenance }, null, 2));

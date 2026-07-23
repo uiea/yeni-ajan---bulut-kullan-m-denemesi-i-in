@@ -17,6 +17,8 @@ Her iki modda da önizleme kaynağı seçilir: `Lisanslı stok medya` (Pexels/Pi
 Seçimler tamamlandığında içerik işleyicisi görsel/video/carousel önizlemesini üretir ve yalnızca izinli Telegram sohbetine gönderir. Bu önizleme paylaşım değildir; kullanıcı `düzelt`, `taslak`, `planla` veya `paylaş` komutuyla sonraki eylemi seçer.
 
 Bot aynı sohbet içinde tek bir ilerleme mesajını günceller. Konu alındığında %10, seçimler boyunca %25-%45, önizleme sırasına alındığında %70 ve önizleme gönderildiğinde %100 gösterilir. Stok medya işçisi çalışırken çubuk; Pexels araması (%75), aday filtreleme (%80), indirme (%85), provenance kaydı (%90) ve açıklama/hashtag üretimi (%95) adımlarını da metin olarak gösterir.
+
+İlerleme mesajının altındaki `Mevcut durum` bölümü, son sekiz işlem aşamasını listeler. Aynı özet Telegram'daki `/durum` komutunda da görünür. Her aşama yeni bir Telegram mesajı olarak gönderilir; böylece en güncel durum sohbetin en altında yer alır.
 ## İnceleme paketi
 
 Seçimler tamamlandığında sistem şu paketi oluşturur ve Telegram incelemesine hazırlar:

@@ -53,19 +53,21 @@ const chooseMediaSource = (id) => [
   [{ text: 'Karma kullanım', callback_data: `source:mixed:${id}` }],
   [{ text: 'İptal', callback_data: `cancel:${id}` }]
 ];
-const progressText = (percent, label) => {
+const recordActivity = (topic, percent, label, steps = []) => {
+  topic.activity = [...(topic.activity ?? []), { at: new Date().toISOString(), percent, label, steps }].slice(-8);
+};
+const progressText = (percent, label, activity = [], operation = { percent: 100, label }) => {
   const completed = Math.round(percent / 10);
-  return `İçerik hazırlanıyor\n[${'█'.repeat(completed)}${'░'.repeat(10 - completed)}] %${percent}\n${label}`;
+  const operationCompleted = Math.round(operation.percent / 10);
+  const statusLines = activity.map((entry) => `• %${entry.percent} — ${entry.label}`).join('\n');
+  return `Genel ilerleme\n[${'█'.repeat(completed)}${'░'.repeat(10 - completed)}] %${percent}\n\nŞu anki işlem: ${operation.label}\n[${'█'.repeat(operationCompleted)}${'░'.repeat(10 - operationCompleted)}] %${operation.percent}\n\n${label}${statusLines ? `\n\nMevcut durum:\n${statusLines}` : ''}`;
 };
 const updateProgress = async (topic, percent, label) => {
-  topic.progress = { percent, label, updatedAt: new Date().toISOString() };
-  const text = progressText(percent, label);
-  if (topic.progressMessageId) {
-    await api('editMessageText', { chat_id: topic.chatId, message_id: topic.progressMessageId, text, reply_markup: { inline_keyboard: [[{ text: 'İptal', callback_data: `cancel:${topic.id ?? ''}` }]] } }).catch(() => {});
-  } else {
-    const message = await reply(topic.chatId, text, [[{ text: 'İptal', callback_data: `cancel:${topic.id ?? ''}` }]]);
-    topic.progressMessageId = message.message_id;
-  }
+  recordActivity(topic, percent, label);
+  topic.progress = { percent, label, operation: { percent: 100, label }, updatedAt: new Date().toISOString() };
+  const text = progressText(percent, label, topic.activity, topic.progress.operation);
+  const message = await reply(topic.chatId, text, [[{ text: 'İptal', callback_data: `cancel:${topic.id ?? ''}` }]]);
+  topic.progressMessageId = message.message_id;
 };
 const updateCaptionSection = (topic, section, value) => {
   if (!topic.captionPath) throw new Error('Bu konu için henüz açıklama paketi oluşturulmadı.');
@@ -105,7 +107,8 @@ const showStatus = async (chatId) => {
   if (!latest) return reply(chatId, 'Aktif içerik bulunmuyor. Yeni içerik için konu: ile başlayan mesaj gönder.');
   const [topicId, topic] = latest;
   const progress = topic.progress ? `\nİlerleme: %${topic.progress.percent} — ${topic.progress.label}` : '';
-  return reply(chatId, `Çalışma durumu\nKonu: ${topic.topic}\nKimlik: ${topicId}\nAşama: ${topic.status}${progress}\n\n${resumeInstruction(topic)}`);
+  const activity = (topic.activity ?? []).map((entry) => `• %${entry.percent} — ${entry.label}`).join('\n');
+  return reply(chatId, `Çalışma durumu\nKonu: ${topic.topic}\nKimlik: ${topicId}\nAşama: ${topic.status}${progress}${activity ? `\n\nMevcut durum:\n${activity}` : ''}\n\n${resumeInstruction(topic)}`);
 };
 const startInstagramPublish = (topic) => {
   if (!topic.previewFilePath || !topic.captionPath) throw new Error('Yayın için görsel veya açıklama paketi eksik.');

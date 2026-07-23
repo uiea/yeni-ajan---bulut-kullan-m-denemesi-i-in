@@ -78,5 +78,5 @@ fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
 await reportProgress(root, topicId, 95, 'Açıklama ve hashtag paketi hazırlanıyor.', [
   'Farklı kanca ve CTA seçildi',
   'Hashtag tekrarları kontrol edildi'
-]);
+], 80, 'Metin paketi üretimi');
 console.log(path.join(packageDir, 'caption.txt'));

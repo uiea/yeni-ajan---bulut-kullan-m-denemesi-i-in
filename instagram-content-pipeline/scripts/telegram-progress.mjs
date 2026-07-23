@@ -12,26 +12,31 @@ const loadEnv = (root) => {
   }
   return env;
 };
-const render = (percent, label, steps) => {
+const render = (percent, label, steps, activity, operation) => {
   const completed = Math.round(percent / 10);
+  const operationCompleted = Math.round(operation.percent / 10);
   const details = steps.map((step) => `• ${step}`).join('\n');
-  return `İçerik hazırlanıyor\n[${'█'.repeat(completed)}${'░'.repeat(10 - completed)}] %${percent}\n\nŞu an: ${label}${details ? `\n\nİşlemler:\n${details}` : ''}`;
+  const statusLines = activity.map((entry) => `• %${entry.percent} — ${entry.label}`).join('\n');
+  return `Genel ilerleme\n[${'█'.repeat(completed)}${'░'.repeat(10 - completed)}] %${percent}\n\nŞu anki işlem: ${operation.label}\n[${'█'.repeat(operationCompleted)}${'░'.repeat(10 - operationCompleted)}] %${operation.percent}\n\n${label}${details ? `\n\nİşlem ayrıntıları:\n${details}` : ''}${statusLines ? `\n\nMevcut durum:\n${statusLines}` : ''}`;
 };
 
-export const reportProgress = async (root, topicId, percent, label, steps = []) => {
+export const reportProgress = async (root, topicId, percent, label, steps = [], operationPercent = 0, operationLabel = label) => {
   const statePath = path.join(root, 'data', 'telegram-state.json');
   const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   const topic = state.topics[topicId];
   if (!topic) throw new Error('İlerleme bildirimi için konu bulunamadı.');
-  topic.progress = { percent, label, steps, updatedAt: new Date().toISOString() };
+  topic.activity = [...(topic.activity ?? []), { at: new Date().toISOString(), percent, label, steps }].slice(-8);
+  topic.progress = { percent, label, steps, operation: { percent: operationPercent, label: operationLabel }, updatedAt: new Date().toISOString() };
   const env = loadEnv(root);
-  const text = render(percent, label, steps);
-  if (env.TELEGRAM_BOT_TOKEN && topic.progressMessageId) {
-    await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/editMessageText`, {
+  const text = render(percent, label, steps, topic.activity, topic.progress.operation);
+  if (env.TELEGRAM_BOT_TOKEN) {
+    const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: topic.chatId, message_id: topic.progressMessageId, text, reply_markup: { inline_keyboard: [[{ text: 'İptal', callback_data: `cancel:${topicId}` }]] } })
-    }).catch(() => {});
+      body: JSON.stringify({ chat_id: topic.chatId, text, reply_markup: { inline_keyboard: [[{ text: 'İptal', callback_data: `cancel:${topicId}` }]] } })
+    }).catch(() => null);
+    const payload = response ? await response.json().catch(() => null) : null;
+    if (payload?.ok) topic.progressMessageId = payload.result.message_id;
   }
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 };

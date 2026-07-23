@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { reportProgress } from './telegram-progress.mjs';
 
 const args = process.argv.slice(2);
 const file = args[0];
@@ -45,16 +46,9 @@ if (topicId) {
     const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
     const topic = state.topics[topicId];
     if (topic) topic.previewFilePath = path.relative(root, path.resolve(file));
-    if (topic?.progressMessageId) {
-      const completed = '█'.repeat(10);
-      await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/editMessageText`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ chat_id: env.TELEGRAM_ALLOWED_CHAT_ID, message_id: topic.progressMessageId, text: `İçerik hazırlanıyor\n[${completed}] %100\nÖnizleme hazır. İnceleme ve onayını bekliyor.` })
-      });
-      topic.progress = { percent: 100, label: 'Önizleme hazır.', updatedAt: new Date().toISOString() };
-    }
+    if (topic) topic.progress = { percent: 100, label: 'Önizleme hazır.', updatedAt: new Date().toISOString() };
     fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+    await reportProgress(root, topicId, 100, 'Önizleme Telegram’a gönderildi.', ['İnceleme ve onay bekleniyor'], 100, 'Telegram önizleme gönderimi');
   }
 }
 console.log('Preview sent to allowed Telegram chat.');

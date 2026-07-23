@@ -1,5 +1,5 @@
 {
-  "offset": 753570467,
+  "offset": 753570479,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -60,7 +60,8 @@
       "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
       "receivedAt": "2026-07-23T21:50:16.807Z",
       "chatId": 8339222977,
-      "status": "publish-started",
+      "status": "publish-verification-required",
+      "publishVerificationNote": "Aktif yayın süreci veya Instagram sonuç bildirimi bulunamadı; profil üzerinden kontrol veya yeniden yayın onayı gerekli.",
       "progress": {
         "percent": 70,
         "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
@@ -119,13 +120,121 @@
       "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
       "receivedAt": "2026-07-23T22:38:53.129Z",
       "chatId": 8339222977,
-      "status": "brief-ready",
+      "status": "cancelled",
       "progress": {
         "percent": 70,
         "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
         "updatedAt": "2026-07-23T22:38:56.969Z"
       },
       "progressMessageId": 65,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock",
+      "cancelledAt": "2026-07-23T22:40:47.606Z"
+    },
+    "753570468": {
+      "id": "753570468",
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T22:40:51.420Z",
+      "chatId": 8339222977,
+      "status": "cancelled",
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "updatedAt": "2026-07-23T22:40:55.824Z"
+      },
+      "progressMessageId": 71,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock",
+      "cancelledAt": "2026-07-23T22:45:15.944Z"
+    },
+    "753570472": {
+      "id": "753570472",
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T22:46:10.455Z",
+      "chatId": 8339222977,
+      "status": "cancelled",
+      "activity": [
+        {
+          "at": "2026-07-23T22:46:10.462Z",
+          "percent": 10,
+          "label": "Konu alındı. İçerik tercihi bekleniyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-23T22:46:20.643Z",
+          "percent": 30,
+          "label": "Format belirlendi. Görsel kaynağı seçimi bekleniyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-23T22:46:29.039Z",
+          "percent": 70,
+          "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+          "steps": []
+        }
+      ],
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "operation": {
+          "percent": 100,
+          "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı."
+        },
+        "updatedAt": "2026-07-23T22:46:29.039Z"
+      },
+      "progressMessageId": 77,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock",
+      "cancelledAt": "2026-07-23T22:48:41.371Z"
+    },
+    "753570476": {
+      "id": "753570476",
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-23T22:48:44.706Z",
+      "chatId": 8339222977,
+      "status": "brief-ready",
+      "activity": [
+        {
+          "at": "2026-07-23T22:48:44.706Z",
+          "percent": 10,
+          "label": "Konu alındı. İçerik tercihi bekleniyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-23T22:48:47.066Z",
+          "percent": 30,
+          "label": "Format belirlendi. Görsel kaynağı seçimi bekleniyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-23T22:48:50.363Z",
+          "percent": 70,
+          "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+          "steps": []
+        }
+      ],
+      "progress": {
+        "percent": 70,
+        "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+        "operation": {
+          "percent": 100,
+          "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı."
+        },
+        "updatedAt": "2026-07-23T22:48:50.363Z"
+      },
+      "progressMessageId": 87,
       "mode": "auto",
       "format": "single-image-caption",
       "textOnVisual": true,
