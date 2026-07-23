@@ -74,10 +74,15 @@ if (shouldSaveDraft) {
   // Instagram Web taslağı, paylaşım ekranından kapatma isteği gönderildiğinde
   // açılan "Taslağı kaydet" onayıyla saklanır.
   await page.screenshot({ path: "taslak-onizleme.png", fullPage: true });
-  const dialog = page.locator('[role="dialog"]').last();
-  const close = dialog.locator('[aria-label="Close"], [aria-label="Kapat"]').first();
-  await close.waitFor({ state: "visible", timeout: 30000 });
-  await close.click();
+  await page.keyboard.press("Escape"); // hashtag önerilerini kapat
+  await page.waitForTimeout(300);
+  // Bu Instagram düzeninde pencereyi kapatma işareti, form diyaloğunun dışında yer alır.
+  const close = page.locator('[aria-label="Close"], [aria-label="Kapat"]').last();
+  if (await close.count()) {
+    await close.click();
+  } else {
+    await page.mouse.click(1237, 27);
+  }
   const saveDraft = page.getByRole("button", { name: /save draft|taslağı kaydet|taslak olarak kaydet/i })
     .or(page.getByText(/save draft|taslağı kaydet|taslak olarak kaydet/i));
   await saveDraft.first().waitFor({ state: "visible", timeout: 30000 });
