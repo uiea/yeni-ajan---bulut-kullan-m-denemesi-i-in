@@ -17,6 +17,15 @@ if (!token || !allowedChatId) throw new Error('Telegram token veya izinli chat I
 const statePath = path.join(root, 'data', 'telegram-state.json');
 const state = fs.existsSync(statePath) ? JSON.parse(fs.readFileSync(statePath, 'utf8')) : { offset: 0, topics: {} };
 const save = () => { fs.mkdirSync(path.dirname(statePath), { recursive: true }); fs.writeFileSync(statePath, JSON.stringify(state, null, 2)); };
+const previewQueuePath = path.join(root, 'data', 'preview-queue.json');
+const enqueuePreview = (topicId) => {
+  const queue = fs.existsSync(previewQueuePath) ? JSON.parse(fs.readFileSync(previewQueuePath, 'utf8')) : { jobs: [] };
+  if (!queue.jobs.some((job) => job.topicId === topicId && ['queued', 'processing'].includes(job.status))) {
+    queue.jobs.push({ topicId, status: 'queued', queuedAt: new Date().toISOString() });
+    fs.mkdirSync(path.dirname(previewQueuePath), { recursive: true });
+    fs.writeFileSync(previewQueuePath, JSON.stringify(queue, null, 2));
+  }
+};
 const api = async (method, body) => {
   const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
     method: body ? 'POST' : 'GET', headers: body ? { 'content-type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined
@@ -44,7 +53,8 @@ async function handleCallback(callback) {
     topic.slides = topic.format === 'carousel' ? 6 : null;
     topic.durationSeconds = topic.format === 'reel' ? 15 : null;
     topic.status = 'brief-ready';
-    return reply(chatId, `Otomatik mod seçildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}.\n\nİçerik brief'i hazır; sonraki aşamada önizleme hazırlanacak.`);
+    enqueuePreview(topicId);
+    return reply(chatId, `Otomatik mod seçildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}.\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
   }
   if (action === 'guided') {
     topic.mode = 'guided'; topic.status = 'awaiting-format';
@@ -70,7 +80,8 @@ async function handleCallback(callback) {
   if (action === 'duration') { topic.durationSeconds = Number(value); topic.status = 'awaiting-overlay'; return reply(chatId, '3/3 - Reel üzerinde kısa metin olsun mu?', chooseOverlay(topicId)); }
   if (action === 'overlay') {
     topic.textOnVisual = value === 'yes'; topic.status = 'brief-ready';
-    return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nİçerik brief'i hazır; önizleme aşamasına geçebiliriz.`);
+    enqueuePreview(topicId);
+    return reply(chatId, `Seçimler kaydedildi.\nFormat: ${topic.format}${topic.slides ? ` (${topic.slides} slayt)` : ''}${topic.durationSeconds ? ` (${topic.durationSeconds} sn)` : ''}\nGörsel metni: ${topic.textOnVisual ? 'evet' : 'hayır'}\n\nİçerik brief'i hazır. Önizleme hazırlanıyor; tamamlandığında bu sohbete gönderilecek.`);
   }
 }
 

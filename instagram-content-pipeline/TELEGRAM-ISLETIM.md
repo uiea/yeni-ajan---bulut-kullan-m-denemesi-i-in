@@ -12,4 +12,4 @@ node .\scripts\telegram-listener.mjs --watch
 
 Bot bir karşılama mesajı gönderir. Daha sonra normal bir metin gönderildiğinde bot metni konu olarak kaydeder ve iki düğme sunar: `Otomatik oluştur` ve `Adım adım oluştur`. Rehberli modda format, carousel slayt sayısı/reel süresi ve görsel üstü metin kararları sırasıyla düğmeler üzerinden alınır.
 
-Bu sürüm konu alma ve mod seçimini kurar. Medya arama, render ve Instagram eylemleri sonraki işleyicilerde kullanıcı onayıyla başlatılır.
+Seçimler tamamlandığında içerik işleyicisi görsel/video/carousel önizlemesini üretir ve yalnızca izinli Telegram sohbetine gönderir. Bu önizleme paylaşım değildir; kullanıcı `düzelt`, `taslak`, `planla` veya `paylaş` komutuyla sonraki eylemi seçer.
