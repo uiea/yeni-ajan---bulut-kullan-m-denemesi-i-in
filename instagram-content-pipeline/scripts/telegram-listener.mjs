@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import os from 'node:os';
 import { quotaText, quotaGuidance } from './quota-utils.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -56,9 +57,40 @@ const chooseMediaSource = (id) => [
 ];
 const audioCatalogPath = path.join(root, 'library', 'music', 'catalog.json');
 const chooseAudioCandidate = (topic) => {
-  const catalog = fs.existsSync(audioCatalogPath) ? JSON.parse(fs.readFileSync(audioCatalogPath, 'utf8')) : { tracks: [] };
+  const pendingPath = path.join(root, 'data', 'pending-audio-selections.json');
+  const pending = fs.existsSync(pendingPath) ? JSON.parse(fs.readFileSync(pendingPath, 'utf8')).selections ?? [] : [];
   const rejected = new Set(topic.rejectedTrackIds ?? []);
+  const remote = pending.find((track) => track.status === 'awaiting-local-download' && !rejected.has(track.id));
+  if (remote) return { ...remote, remote: true };
+  const catalog = fs.existsSync(audioCatalogPath) ? JSON.parse(fs.readFileSync(audioCatalogPath, 'utf8')) : { tracks: [] };
   return catalog.tracks.find((track) => !rejected.has(track.id));
+};
+const sendMusicLinkCandidate = (chatId, track, topicId) => reply(chatId, `Ses adayı: ${track.title}\nKaynak: ${track.source}\nLisans: ${track.license}\n\nBağlantıyı açıp önce dinle. Beğenirsen seç; MP3 yalnızca seçimin ardından indirilecek.`, [
+  [{ text: '▶️ Dinle', url: track.sourceUrl }],
+  [{ text: 'Bu sesi kullan', callback_data: `music:approve:${topicId}` }],
+  [{ text: 'Başka ses ara', callback_data: `music:next:${topicId}` }],
+  [{ text: 'Sessiz Reel', callback_data: `music:silent:${topicId}` }],
+  [{ text: 'İptal', callback_data: `cancel:${topicId}` }]
+]);
+const registerSelectedMusic = async (topic, topicId, file) => {
+  const candidate = topic.audioCandidate;
+  const child = spawn(process.execPath, ['scripts/register-music.mjs', '--file', file, '--title', candidate.title, '--source-url', candidate.sourceUrl, '--license', 'Pixabay Content License', '--creator', candidate.creator ?? ''], { cwd: root, windowsHide: true });
+  const code = await new Promise((resolve) => child.on('close', resolve));
+  if (code !== 0) throw new Error('Müzik dosyası kütüphaneye eklenemedi.');
+  const catalog = JSON.parse(fs.readFileSync(audioCatalogPath, 'utf8'));
+  const track = catalog.tracks.find((item) => item.sourceUrl === candidate.sourceUrl);
+  if (!track) throw new Error('Müzik kütüphanesi kaydı oluşturulamadı.');
+  topic.audio = { trackId: track.id, title: track.title, filePath: track.filePath, sourceUrl: track.sourceUrl };
+  topic.status = 'brief-ready';
+  enqueuePreview(topicId, 'render');
+};
+const latestDownloadedMp3 = (after) => {
+  const downloads = path.join(os.homedir(), 'Downloads');
+  if (!fs.existsSync(downloads)) return null;
+  return fs.readdirSync(downloads, { withFileTypes: true }).filter((entry) => entry.isFile() && /\.(mp3|m4a|wav|aac)$/i.test(entry.name))
+    .map((entry) => path.join(downloads, entry.name))
+    .filter((file) => fs.statSync(file).mtimeMs >= new Date(after).getTime() - 5000)
+    .sort((left, right) => fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs)[0] ?? null;
 };
 const sendMusicCandidate = async (topic, topicId, track) => {
   const script = path.join(root, 'scripts', 'telegram-send-music-candidate.mjs');
@@ -266,9 +298,10 @@ async function handleCallback(callback) {
           topic.status = 'awaiting-music-library';
           return reply(chatId, 'Reel için onaylı ses kütüphanesi henüz boş. Pixabay’den bir MP3 indirip kütüphaneye ekledikten sonra ses önizlemesi gönderilecek.');
         }
-        topic.audioCandidate = { trackId: track.id, title: track.title, filePath: track.filePath };
+        topic.audioCandidate = { trackId: track.id, title: track.title, creator: track.creator, filePath: track.filePath, sourceUrl: track.sourceUrl, remote: track.remote === true };
         topic.status = 'awaiting-audio-approval';
-        await sendMusicCandidate(topic, topicId, track);
+        if (track.remote) await sendMusicLinkCandidate(chatId, track, topicId);
+        else await sendMusicCandidate(topic, topicId, track);
         return;
       }
       topic.status = 'brief-ready';
@@ -288,6 +321,15 @@ async function handleCallback(callback) {
   }
   if (action === 'music') {
     if (value === 'approve') {
+      if (topic.audioCandidate?.remote) {
+        topic.status = 'awaiting-music-download';
+        topic.audioCandidate.selectedAt = new Date().toISOString();
+        return reply(chatId, `Ses seçildi: ${topic.audioCandidate.title}\n\nPixabay sayfasındaki Free download düğmesiyle MP3’ü indir. Ardından aşağıdaki “İndirdim, otomatik ekle” düğmesine bas; sistem İndirilenler klasöründeki yeni dosyayı bulup lisans kaydıyla ekleyecek.`, [
+          [{ text: '⬇️ Pixabay’den indir', url: topic.audioCandidate.sourceUrl }],
+          [{ text: '✅ İndirdim, otomatik ekle', callback_data: `music:import:${topicId}` }],
+          [{ text: 'Başka ses ara', callback_data: `music:next:${topicId}` }]
+        ]);
+      }
       topic.audio = topic.audioCandidate;
       topic.status = 'brief-ready';
       enqueuePreview(topicId, 'render');
@@ -298,9 +340,19 @@ async function handleCallback(callback) {
       topic.rejectedTrackIds = [...new Set([...(topic.rejectedTrackIds ?? []), topic.audioCandidate?.trackId].filter(Boolean))];
       const nextTrack = chooseAudioCandidate(topic);
       if (!nextTrack) { topic.status = 'awaiting-music-library'; return reply(chatId, 'Kütüphanede başka onaylı ses kalmadı. Pixabay’den yeni bir parça ekleyebilirsin.'); }
-      topic.audioCandidate = { trackId: nextTrack.id, title: nextTrack.title, filePath: nextTrack.filePath };
-      await sendMusicCandidate(topic, topicId, nextTrack);
+      topic.audioCandidate = { trackId: nextTrack.id, title: nextTrack.title, creator: nextTrack.creator, filePath: nextTrack.filePath, sourceUrl: nextTrack.sourceUrl, remote: nextTrack.remote === true };
+      if (nextTrack.remote) await sendMusicLinkCandidate(chatId, nextTrack, topicId);
+      else await sendMusicCandidate(topic, topicId, nextTrack);
       return;
+    }
+    if (value === 'import') {
+      if (topic.status !== 'awaiting-music-download') return reply(chatId, 'Önce bir ses seçip indirme adımına geçmelisin.');
+      const file = latestDownloadedMp3(topic.audioCandidate?.selectedAt);
+      if (!file) return reply(chatId, 'İndirilenler klasöründe seçimden sonra indirilmiş bir MP3/WAV/M4A/AAC bulunamadı. İndirme tamamlanınca bu düğmeye tekrar bas.');
+      try {
+        await registerSelectedMusic(topic, topicId, file);
+        return reply(chatId, 'Müzik otomatik bulundu, lisans kaydıyla kütüphaneye eklendi. Sesli Reel önizlemesi hazırlanacak.');
+      } catch (error) { return reply(chatId, `Müzik eklenemedi: ${error.message}`); }
     }
     if (value === 'silent') {
       topic.audio = null;
@@ -381,6 +433,16 @@ async function processUpdates(timeout = 0) {
         const text = message.text.trim();
         if (text === '/start' || text === '/durum') await showStatus(message.chat.id);
         else if (text === '/kota') await reply(message.chat.id, `Medya kotası\n\n${quotaText(root)}\n\nAlternatif yol\n${quotaGuidance(root)}\n\nBu değerler sistemin güvenli çalışma limitleridir. Limit dolarsa yeni arama/indirme başlatılmaz; günlük limit İstanbul saatine göre gece sıfırlanır.`);
+        else if (/^\/muzikdosya\s+/i.test(text)) {
+          const pending = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && topic.status === 'awaiting-music-download');
+          if (!pending) await reply(message.chat.id, 'Müzik dosyası bekleyen bir Reel bulunmuyor.');
+          else {
+            const [topicId, topic] = pending;
+            const file = text.replace(/^\/muzikdosya\s+/i, '').trim().replace(/^"|"$/g, '');
+            try { await registerSelectedMusic(topic, topicId, file); await reply(message.chat.id, 'Müzik lisans kaydıyla kütüphaneye eklendi. Sesli Reel önizlemesi hazırlanacak.'); }
+            catch { await reply(message.chat.id, 'Müzik dosyası kütüphaneye eklenemedi. Dosya yolunu ve MP3 uzantısını kontrol et.'); }
+          }
+        }
       else {
         const pendingEdit = Object.entries(state.topics).reverse().find(([, topic]) => String(topic.chatId) === String(message.chat.id) && ['awaiting-caption-edit', 'awaiting-hashtag-edit'].includes(topic.status));
         if (pendingEdit) {

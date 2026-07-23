@@ -4,6 +4,7 @@ data/preview-queue.json
 data/copy-history.json
 data/content-history.json
 data/pending-audio-selections.json
+data/pixabay-music-browser-profile/
 library/asset-index.json
 library/music/approved/
 packages/
