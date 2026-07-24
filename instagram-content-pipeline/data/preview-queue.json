@@ -68,6 +68,33 @@
       "startedAt": "2026-07-23T23:00:48.946Z",
       "completedAt": "2026-07-23T23:01:01.091Z",
       "previewFile": "packages\\telegram-753570476\\single-image-preview-1784847654065.png"
+    },
+    {
+      "topicId": "753570483",
+      "stage": "candidate",
+      "status": "awaiting-asset-approval",
+      "queuedAt": "2026-07-24T00:22:32.474Z",
+      "startedAt": "2026-07-24T00:22:35.822Z",
+      "completedAt": "2026-07-24T00:22:39.327Z",
+      "candidateAssetId": "15422736"
+    },
+    {
+      "topicId": "753570483",
+      "stage": "candidate",
+      "status": "awaiting-asset-approval",
+      "queuedAt": "2026-07-24T00:22:53.600Z",
+      "startedAt": "2026-07-24T00:22:54.370Z",
+      "completedAt": "2026-07-24T00:22:57.217Z",
+      "candidateAssetId": "15422736"
+    },
+    {
+      "topicId": "753570483",
+      "stage": "render",
+      "status": "failed",
+      "queuedAt": "2026-07-24T00:23:01.611Z",
+      "startedAt": "2026-07-24T00:23:02.237Z",
+      "failedAt": "2026-07-24T00:23:03.182Z",
+      "reason": "Cannot read properties of undefined (reading 'filePath')"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "offset": 753570483,
+  "offset": 753570489,
   "topics": {
     "753570422": {
       "topic": "yapay zeka ile ilgili ilgi çekici bir görsel",
@@ -268,6 +268,74 @@
         "message": "Instagram paylaşım onayı algılandı.",
         "resultPath": "packages\\telegram-753570476\\publish-result-1784848122841.json"
       }
+    },
+    "753570483": {
+      "id": "753570483",
+      "topic": "Yapay zeka ile ilgili ilgi çekici bir görsel",
+      "receivedAt": "2026-07-24T00:22:22.428Z",
+      "chatId": 8339222977,
+      "status": "cancelled",
+      "activity": [
+        {
+          "at": "2026-07-24T00:22:22.452Z",
+          "percent": 10,
+          "label": "Konu alındı. İçerik tercihi bekleniyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-24T00:22:27.321Z",
+          "percent": 30,
+          "label": "Format belirlendi. Görsel kaynağı seçimi bekleniyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-24T00:22:32.475Z",
+          "percent": 70,
+          "label": "İçerik brief’i tamamlandı. Önizleme üretim sırasına alındı.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-24T00:22:53.601Z",
+          "percent": 72,
+          "label": "Görsel reddedildi. Farklı aday aranıyor.",
+          "steps": []
+        },
+        {
+          "at": "2026-07-24T00:23:01.612Z",
+          "percent": 88,
+          "label": "Görsel onaylandı. Metin ve paylaşım önizlemesi hazırlanıyor.",
+          "steps": []
+        }
+      ],
+      "progress": {
+        "percent": 88,
+        "label": "Görsel onaylandı. Metin ve paylaşım önizlemesi hazırlanıyor.",
+        "operation": {
+          "percent": 100,
+          "label": "Görsel onaylandı. Metin ve paylaşım önizlemesi hazırlanıyor."
+        },
+        "updatedAt": "2026-07-24T00:23:01.612Z"
+      },
+      "progressMessageId": 139,
+      "mode": "auto",
+      "format": "single-image-caption",
+      "textOnVisual": true,
+      "slides": null,
+      "durationSeconds": null,
+      "mediaSource": "stock",
+      "rejectedAssetIds": [],
+      "headline": "Yapay Zekâ ile Daha Akıllı Başlangıçlar",
+      "copyVariant": {
+        "headline": 1,
+        "hook": 4,
+        "body": 5,
+        "cta": 0,
+        "hashtags": 5,
+        "signature": "ai:1-4-5-0-5"
+      },
+      "copySignature": "ai:1-4-5-0-5",
+      "captionPath": "packages\\telegram-753570483\\caption.txt",
+      "cancelledAt": "2026-07-24T00:23:19.801Z"
     }
   }
 }
